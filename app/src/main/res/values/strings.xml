@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">BopPong_dev</string>
+    <string name="playerSelect">Select the number of players</string>
+    <string name="startButton">Start</string>
 </resources>
