@@ -38,6 +38,7 @@
             android:layout_height="wrap_content"
             android:layout_marginVertical="50dp"
             android:layout_weight="1"
+            android:onClick="songStop"
             android:text="@string/startButton" />
     </LinearLayout>
 
