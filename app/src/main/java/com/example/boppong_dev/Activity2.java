@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,15 +15,15 @@ import android.widget.TextView;
 import com.example.boppong_dev.Connectors.SongService;
 import com.example.boppong_dev.Model.Player;
 import com.example.boppong_dev.Model.Song;
-import com.example.boppong_dev.Model.User;
 import com.example.boppong_dev.Model.players_recyclerViewAdapter;
+import com.example.boppong_dev.Model.RecyclerViewInterface;
 import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
 
 import java.util.ArrayList;
 
-public class Activity2 extends AppCompatActivity {
+public class Activity2 extends AppCompatActivity implements RecyclerViewInterface {
     ArrayList<Player> players = new ArrayList<>();
     int[] playerProfilesDefault = {R.drawable.testprofile1,R.drawable.testprofile2
             ,R.drawable.testprofile3,R.drawable.testprofile4,R.drawable.testprofile5,R.drawable.testprofile6};
@@ -55,7 +56,7 @@ public class Activity2 extends AppCompatActivity {
 
         RecyclerView recyclerView = findViewById(R.id.playerRecyclerView);
         setUpPlayers();
-        players_recyclerViewAdapter adapter = new players_recyclerViewAdapter(this,players);
+        players_recyclerViewAdapter adapter = new players_recyclerViewAdapter(this,players,this);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         //getTracks();
@@ -108,5 +109,17 @@ public class Activity2 extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         SpotifyAppRemote.disconnect(mSpotifyAppRemote);
+    }
+
+    @Override
+    public void onItemClick(int position) {
+        Intent intent = new Intent(this,Activity3.class);
+
+        intent.putExtra("id", players.get(position).getId());
+        intent.putExtra("name", players.get(position).getName());
+        intent.putExtra("image", players.get(position).getImage());
+        intent.putExtra("song", players.get(position).getSongSubmission().getName());
+
+        startActivity(intent);
     }
 }
