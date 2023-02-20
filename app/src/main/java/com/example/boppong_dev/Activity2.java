@@ -1,6 +1,8 @@
 package com.example.boppong_dev;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -10,7 +12,10 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.boppong_dev.Connectors.SongService;
+import com.example.boppong_dev.Model.Player;
 import com.example.boppong_dev.Model.Song;
+import com.example.boppong_dev.Model.User;
+import com.example.boppong_dev.Model.players_recyclerViewAdapter;
 import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
@@ -18,7 +23,9 @@ import com.spotify.android.appremote.api.SpotifyAppRemote;
 import java.util.ArrayList;
 
 public class Activity2 extends AppCompatActivity {
-
+    ArrayList<Player> players = new ArrayList<>();
+    int[] playerProfilesDefault = {R.drawable.testprofile1,R.drawable.testprofile2
+            ,R.drawable.testprofile3,R.drawable.testprofile4,R.drawable.testprofile5,R.drawable.testprofile6};
     private TextView userView;
     private TextView songView;
     private Button pauseBtn;
@@ -42,17 +49,25 @@ public class Activity2 extends AppCompatActivity {
         setContentView(R.layout.activity_2);
 
         songService = new SongService(getApplicationContext());
-        userView = (TextView) findViewById(R.id.user);
-        songView = (TextView) findViewById(R.id.song);
-        pauseBtn = (Button) findViewById(R.id.pause);
 
         SharedPreferences sharedPreferences = this.getSharedPreferences("SPOTIFY", 0);
-        userView.setText(sharedPreferences.getString("userid", "No User"));
+        //userView.setText(sharedPreferences.getString("userid", "No User"));
 
-        getTracks();
-        connected();
+        RecyclerView recyclerView = findViewById(R.id.playerRecyclerView);
+        setUpPlayers();
+        players_recyclerViewAdapter adapter = new players_recyclerViewAdapter(this,players);
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        //getTracks();
+        //connected();
     }
 
+    private void setUpPlayers(){
+        String[] playerNames = getResources().getStringArray(R.array.testPlayers);
+        for (int i=0;i<playerNames.length;i++){
+            players.add(new Player(i,playerNames[i],new Song(null,null),playerProfilesDefault[i]));
+        }
+    }
 
     private void getTracks() {
         songService.searchTrack(() -> {
@@ -63,7 +78,7 @@ public class Activity2 extends AppCompatActivity {
 
     private void updateSong() {
         if (searchResults.size() > 0) {
-            songView.setText(searchResults.get(0).getName());
+            //songView.setText(searchResults.get(0).getName());
             song = searchResults.get(0);
         }
     }
