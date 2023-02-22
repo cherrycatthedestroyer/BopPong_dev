@@ -117,9 +117,22 @@ public class Activity2 extends AppCompatActivity implements RecyclerViewInterfac
 
         intent.putExtra("id", players.get(position).getId());
         intent.putExtra("name", players.get(position).getName());
-        intent.putExtra("image", players.get(position).getImage());
+        intent.putExtra("image", position);
         intent.putExtra("song", players.get(position).getSongSubmission().getName());
 
         startActivity(intent);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (getIntent().hasExtra("songid")){
+            String songUpdate = getIntent().getStringExtra("song");
+            String songUpdateId = getIntent().getStringExtra("songid");
+            int userPos = getIntent().getIntExtra("id",0);
+            if (songUpdate.length()>0){
+                players.get(userPos).setSongSubmission(new Song(songUpdateId,songUpdate));
+            }
+        }
     }
 }

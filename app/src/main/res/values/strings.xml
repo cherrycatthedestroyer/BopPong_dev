@@ -5,6 +5,9 @@
     <string name="userNameDefault">PlayerX</string>
     <string name="userSongSubmitted">Submitted</string>
     <string name="userSongUnsubmitted">Unsubmitted</string>
+    <string name="saveChanges">Save changes</string>
+    <string name="editName">edit name</string>
+    <string name="selectSong">select song</string>
     <string-array name="testPlayers">
         <item>Josh</item>
         <item>Nathan</item>

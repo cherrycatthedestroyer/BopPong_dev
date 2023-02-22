@@ -6,7 +6,6 @@ public class Player {
     String name;
     Song songSubmission;
 
-
     public Player(int id, String name, Song songSubmission, int image) {
         this.id = id;
         this.image = image;
@@ -28,5 +27,9 @@ public class Player {
 
     public Song getSongSubmission() {
         return songSubmission;
+    }
+
+    public void setSongSubmission(Song newSub){
+        songSubmission = newSub;
     }
 }
