@@ -73,6 +73,9 @@ public class MainActivity extends AppCompatActivity {
                 // Auth flow returned an error
                 case ERROR:
                     System.out.println("bad auth");
+                    System.out.println(response.getCode());
+                    System.out.println(response.getError());
+
                     break;
 
                 // Most likely auth flow was cancelled

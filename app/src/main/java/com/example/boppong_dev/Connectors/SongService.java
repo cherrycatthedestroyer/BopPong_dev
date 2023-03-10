@@ -53,7 +53,7 @@ public class SongService {
 
     public ArrayList<Song> searchTrack(final VolleyCallBack callBack) {
         String endpointPt1 ="https://api.spotify.com/v1/search?q=";
-        String endpointP2 = "&type=track&limit=3&offset=5";
+        String endpointP2 = "&type=track&limit=5&offset=5";
         String endpoint = endpointPt1+inputSong+endpointP2;
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
                 (Request.Method.GET, endpoint, null, response -> {

@@ -177,8 +177,8 @@ public class Activity2 extends AppCompatActivity implements RecyclerViewInterfac
             if (type==gyro.getType()){
                 if (event.values[0]==-1.0){
                     if (playersReady()){
-                        Intent intent = new Intent(this,startRound.class);
-                        startActivity(intent);
+                        //Intent intent = new Intent(this,startRound.class);
+                        //startActivity(intent);
                     }
                 }
             }

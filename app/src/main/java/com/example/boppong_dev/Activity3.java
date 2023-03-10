@@ -3,7 +3,9 @@ package com.example.boppong_dev;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -39,6 +41,8 @@ public class Activity3 extends AppCompatActivity implements TextWatcher, Adapter
     ImageView playerImage;
     int playerId;
     Song chosenSong;
+    ImageView imageViewPhoto;
+    private static final int img_id = 123;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +58,7 @@ public class Activity3 extends AppCompatActivity implements TextWatcher, Adapter
         playerName = findViewById(R.id.playerNameTextView);
         playerImage = findViewById(R.id.selectedPlayerImageView);
         editPlayerName = findViewById(R.id.editNameTextView);
+        imageViewPhoto = findViewById(R.id.selectedPlayerImageView);
 
         playerName.setText(inPlayerName);
         playerImage.setImageResource(playerProfilesDefault[inPlayerImageIndex]);
@@ -68,6 +73,8 @@ public class Activity3 extends AppCompatActivity implements TextWatcher, Adapter
         songSub.setThreshold(3);
         songSub.setOnItemClickListener(this);
         getTracks();
+
+
     }
 
     @Override
@@ -122,4 +129,17 @@ public class Activity3 extends AppCompatActivity implements TextWatcher, Adapter
         Song selection = (Song) parent.getItemAtPosition(position);
         chosenSong = selection;
     }
+
+    public void goToCamera (View view){
+        Intent camera_intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(camera_intent, img_id);
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Bitmap photo = (Bitmap) data.getExtras().get("data");
+        imageViewPhoto.setImageBitmap(photo);
+    }
+
+
 }

@@ -20,13 +20,35 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
-            android:id="@+id/selectedPlayerImageView"
-            android:layout_width="317dp"
-            android:layout_height="276dp"
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="210dp"
+            android:layout_height="210dp"
             android:layout_gravity="center"
-            android:layout_marginTop="30dp"
-            app:srcCompat="@drawable/testprofile1" />
+            android:layout_marginTop="50dp"
+            android:layout_marginBottom="20dp"
+            app:cardBackgroundColor="#C04953"
+            app:cardCornerRadius="250dp">
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:layout_gravity="center"
+                app:cardCornerRadius="250dp">
+
+                <ImageView
+                    android:id="@+id/selectedPlayerImageView"
+                    android:layout_width="200dp"
+                    android:layout_height="200dp"
+                    android:layout_gravity="center"
+                    android:onClick="goToCamera"
+                    android:scaleType="centerCrop"
+                    app:srcCompat="@drawable/testprofile1" />
+
+
+            </androidx.cardview.widget.CardView>
+
+        </androidx.cardview.widget.CardView>
 
         <TextView
             android:id="@+id/playerNameTextView"
