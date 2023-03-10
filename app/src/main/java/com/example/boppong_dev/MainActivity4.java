@@ -32,12 +32,14 @@ public class MainActivity4 extends AppCompatActivity {
 
         clockTimeView.setText(count);
         gameStateView = findViewById(R.id.gameStateView);
-        gameStateView.setText(checkState());
+        gameStateView.setText("guessing");
 
         clockTimeView.addTextChangedListener(new TextWatcher() {
 
             @Override
-            public void afterTextChanged(Editable s) {}
+            public void afterTextChanged(Editable s) {
+
+            }
 
             @Override
             public void beforeTextChanged(CharSequence s, int start,
@@ -54,7 +56,7 @@ public class MainActivity4 extends AppCompatActivity {
             }
         });
 
-
+        startCounting(playerNames.length);
     }
 
     protected String checkState(){
@@ -65,7 +67,7 @@ public class MainActivity4 extends AppCompatActivity {
         return state;
     }
 
-    protected int countDown(){
+    protected int countDown(int playerNumber){
         int i =10;
         while (i>-2){
             count = String.valueOf(i);
@@ -73,6 +75,7 @@ public class MainActivity4 extends AppCompatActivity {
                 @Override
                 public void run() {
                     clockTimeView.setText(count);
+                    gameStateView.setText(checkState());
                 }
             });
             SystemClock.sleep(500);
@@ -86,16 +89,24 @@ public class MainActivity4 extends AppCompatActivity {
         clockTimeView.setText("10");
     }
 
-    public void startCounting (){
-        Thread myThread = new Thread(new CountingThread());
+    public void startCounting (int playerNumber){
+        Thread myThread = new Thread(new CountingThread(playerNames.length));
         myThread.start();
     }
 
     private class CountingThread implements Runnable
     {
+        private int number;
+        public CountingThread(int playerNumber) {
+            number=playerNumber;
+        }
+
         @Override
         public void run() {
-            countDown();
+            for (int i=0;i<number;i++){
+                countDown(number);
+                SystemClock.sleep(5000);
+            }
         }
     }
 }
