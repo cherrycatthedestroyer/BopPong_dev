@@ -4,13 +4,21 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.media.ToneGenerator;
 import android.os.Bundle;
+import android.os.VibrationEffect;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.boppong_dev.Connectors.SongService;
 import com.example.boppong_dev.Model.Player;
@@ -23,7 +31,7 @@ import com.spotify.android.appremote.api.SpotifyAppRemote;
 
 import java.util.ArrayList;
 
-public class Activity2 extends AppCompatActivity implements RecyclerViewInterface {
+public class Activity2 extends AppCompatActivity implements RecyclerViewInterface, SensorEventListener {
     ArrayList<Player> players = new ArrayList<>();
     int[] playerProfilesDefault = {R.drawable.testprofile1,R.drawable.testprofile2
             ,R.drawable.testprofile3,R.drawable.testprofile4,R.drawable.testprofile5,R.drawable.testprofile6};
@@ -44,6 +52,11 @@ public class Activity2 extends AppCompatActivity implements RecyclerViewInterfac
                     .showAuthView(true)
                     .build();
 
+    SensorManager sensorManager;
+    ArrayList<Sensor> sensors;
+    ArrayList<String> sensorList = new ArrayList<String>();
+    Sensor gyro;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,13 +74,33 @@ public class Activity2 extends AppCompatActivity implements RecyclerViewInterfac
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         //getTracks();
         //connected();
+
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        sensors = new ArrayList<Sensor>(sensorManager.getSensorList(Sensor.TYPE_ALL));
+        for (int i=0; i<sensors.size();i++){
+            sensorList.add(sensors.get(i).getName());
+            if (sensors.get(i).getStringType()=="android.sensor.device_orientation"){
+                gyro = sensorManager.getDefaultSensor(sensors.get(i).getType());
+            }
+        }
     }
 
     private void setUpPlayers(){
         String[] playerNames = getResources().getStringArray(R.array.testPlayers);
         for (int i=0;i<playerNames.length;i++){
-            players.add(new Player(i,playerNames[i],new Song(null,null),playerProfilesDefault[i]));
+            players.add(new Player(i,playerNames[i],new Song("i","y"),playerProfilesDefault[i]));
         }
+    }
+
+    private boolean playersReady(){
+        boolean areReady = true;
+        for (int i=0;i<players.size();i++){
+            if (players.get(i).getSongSubmission().getName()==null){
+                areReady = false;
+                break;
+            }
+        }
+        return areReady;
     }
 
     private void getTracks() {
@@ -126,6 +159,7 @@ public class Activity2 extends AppCompatActivity implements RecyclerViewInterfac
     @Override
     protected void onResume() {
         super.onResume();
+        sensorManager.registerListener(this, gyro, SensorManager.SENSOR_DELAY_NORMAL);
         if (getIntent().hasExtra("songid")){
             String songUpdate = getIntent().getStringExtra("song");
             String songUpdateId = getIntent().getStringExtra("songid");
@@ -134,5 +168,30 @@ public class Activity2 extends AppCompatActivity implements RecyclerViewInterfac
                 players.get(userPos).setSongSubmission(new Song(songUpdateId,songUpdate));
             }
         }
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        int type = event.sensor.getType();
+        if (gyro!=null){
+            if (type==gyro.getType()){
+                if (event.values[0]==-1.0){
+                    if (playersReady()){
+                        Intent intent = new Intent(this,startRound.class);
+                        startActivity(intent);
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
+
+    protected void onPause(){
+        sensorManager.unregisterListener(this);
+        super.onPause();
     }
 }

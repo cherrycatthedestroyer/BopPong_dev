@@ -16,4 +16,5 @@
         <item>Nick</item>
         <item>Adrian</item>
     </string-array>
+    <string name="startGame">Start round?</string>
 </resources>
