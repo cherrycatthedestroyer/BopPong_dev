@@ -1,12 +1,14 @@
 package com.example.boppong_dev.Model;
 
+import android.graphics.Bitmap;
+
 public class Player {
     int id;
-    int image;
+    Bitmap image;
     String name;
     Song songSubmission;
 
-    public Player(int id, String name, Song songSubmission, int image) {
+    public Player(int id, String name, Song songSubmission, Bitmap image) {
         this.id = id;
         this.image = image;
         this.name = name;
@@ -17,7 +19,7 @@ public class Player {
         return id;
     }
 
-    public int getImage() {
+    public Bitmap getImage() {
         return image;
     }
 

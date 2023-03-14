@@ -4,6 +4,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.text.Editable;
@@ -11,21 +14,30 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.boppong_dev.Model.Player;
 import com.example.boppong_dev.Model.Song;
 import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
 import com.spotify.protocol.types.Track;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 public class MainActivity4 extends AppCompatActivity {
+    DatabaseHelper myDb;
 
     private ArrayList<String> songList, playerList;
+    ArrayList<Player> players = new ArrayList<>();
 
-    String[] playerNames = {"josh","nathan","ahmik"};
-    String[] playerSongs = {"4sFzG7iUlyPmuyASCkre9A","6ljK8pycxEv0Yqn1cdxvME","0JXXNGljqupsJaZsgSbMZV"};
+    //String[] playerNames = {"josh","nathan","ahmik"};
+    //String[] playerSongs = {"4sFzG7iUlyPmuyASCkre9A","6ljK8pycxEv0Yqn1cdxvME","0JXXNGljqupsJaZsgSbMZV"};
+
+    int[] playerProfilesDefault = {R.drawable.testprofile1,R.drawable.testprofile2
+            ,R.drawable.testprofile3,R.drawable.testprofile4,R.drawable.testprofile5,R.drawable.testprofile6};
 
     TextView clockTimeView, gameStateView, nameRevealView;
     String count,countLimit="2";
@@ -41,6 +53,10 @@ public class MainActivity4 extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main4);
+
+        myDb = new DatabaseHelper(MainActivity4.this);
+        fetchPlayers();
+
         clockTimeView = findViewById(R.id.clockTimeView);
         count = countLimit;
         nameRevealView = findViewById(R.id.nameRevealView);
@@ -111,7 +127,7 @@ public class MainActivity4 extends AppCompatActivity {
 
     private void connected() {
         // Play a playlist
-        startCounting(playerNames.length);
+        startCounting(players.size());
 
         // Subscribe to PlayerState
         mSpotifyAppRemote.getPlayerApi()
@@ -155,7 +171,7 @@ public class MainActivity4 extends AppCompatActivity {
             @Override
             public void run() {
                 if (toggle==0){
-                    nameRevealView.setText(playerNames[playerIndex]);
+                    nameRevealView.setText(players.get(playerIndex).getName());
                 }
                 else{
                     nameRevealView.setText("Who picked it?");
@@ -181,7 +197,7 @@ public class MainActivity4 extends AppCompatActivity {
     }
 
     public void startCounting (int playerNumber){
-        Thread myThread = new Thread(new CountingThread(playerNames.length));
+        Thread myThread = new Thread(new CountingThread(players.size()));
         myThread.start();
     }
 
@@ -195,7 +211,7 @@ public class MainActivity4 extends AppCompatActivity {
         @Override
         public void run() {
             for (int i=0;i<number;i++){
-                mSpotifyAppRemote.getPlayerApi().play("spotify:track:"+playerSongs[i]);
+                mSpotifyAppRemote.getPlayerApi().play("spotify:track:"+players.get(i).getSongSubmission().getId());
                 countDown(number,i);
                 togglePlayerName(i,0);
                 mSpotifyAppRemote.getPlayerApi().pause();
@@ -205,6 +221,32 @@ public class MainActivity4 extends AppCompatActivity {
             incrementRound();
             Intent newIntent = new Intent(MainActivity4.this, Activity2.class);
             startActivity(newIntent);
+        }
+    }
+
+    protected void fetchPlayers(){
+        Cursor cursor = myDb.readAllData();
+        if (cursor.getCount()==0){
+            Toast.makeText(MainActivity4.this,"no data", Toast.LENGTH_SHORT).show();
+        }
+        else{
+            while(cursor.moveToNext()){
+                players.add(new Player(Integer.parseInt(cursor.getString(0)),cursor.getString(1)
+                        ,new Song(cursor.getString(3),cursor.getString(4)),Bytes2Bitmap(cursor.getBlob(2))));
+            }
+        }
+    }
+
+    public final static Bitmap Bytes2Bitmap(byte[] b) {
+        if (b == null) {
+            return null;
+        }
+        if (b.length != 0) {
+            InputStream is = new ByteArrayInputStream(b);
+            Bitmap bmp = BitmapFactory.decodeStream(is);
+            return bmp;
+        } else {
+            return null;
         }
     }
 }

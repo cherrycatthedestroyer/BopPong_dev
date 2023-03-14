@@ -4,7 +4,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -13,6 +16,7 @@ import android.widget.Toast;
 
 
 import com.example.boppong_dev.Connectors.UserService;
+import com.example.boppong_dev.Model.Song;
 import com.example.boppong_dev.Model.User;
 import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
@@ -26,6 +30,12 @@ import com.android.volley.toolbox.Volley;
 import com.spotify.sdk.android.auth.AuthorizationClient;
 import com.spotify.sdk.android.auth.AuthorizationRequest;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectOutputStream;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
@@ -45,6 +55,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     protected Button minus,plus,start;
     protected TextView playerCount;
+    int[] playerProfilesDefault = {R.drawable.testprofile1,R.drawable.testprofile2
+            ,R.drawable.testprofile3,R.drawable.testprofile4,R.drawable.testprofile5,R.drawable.testprofile6};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         int value = Integer.parseInt(playerCount.getText().toString());
-        if (v.getId()==plus.getId()){
+        if (v.getId()==plus.getId()&&value<6){
             value++;
         }
         else if (value>0){
@@ -124,6 +136,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 value--;
             }
             else if (v.getId()==start.getId()){
+                DatabaseHelper playerDb = new DatabaseHelper(MainActivity.this);
+
+                for (int i=0;i<value;i++){
+                    Bitmap icon = BitmapFactory.decodeResource(MainActivity.this.getResources(),
+                            playerProfilesDefault[i]);
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    icon.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                    byte[] b = baos.toByteArray();
+                    String encodedImageString = Base64.encodeToString(b, Base64.DEFAULT);
+
+                    byte[] bytarray = Base64.decode(encodedImageString, Base64.DEFAULT);
+                    playerDb.addPlayer(i,bytarray,"null","null","null");
+                }
+
                 builder.setScopes(new String[]{"streaming"});
                 AuthorizationRequest request = builder.build();
                 AuthorizationClient.openLoginActivity(this, REQUEST_CODE, request);

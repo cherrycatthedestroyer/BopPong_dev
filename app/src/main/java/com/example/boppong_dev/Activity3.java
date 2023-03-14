@@ -4,10 +4,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -24,12 +26,14 @@ import com.example.boppong_dev.Connectors.SongService;
 import com.example.boppong_dev.Model.Player;
 import com.example.boppong_dev.Model.Song;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Activity3 extends AppCompatActivity implements TextWatcher, AdapterView.OnItemClickListener {
+    DatabaseHelper myDb;
     int[] playerProfilesDefault = {R.drawable.testprofile1,R.drawable.testprofile2
             ,R.drawable.testprofile3,R.drawable.testprofile4,R.drawable.testprofile5,R.drawable.testprofile6};
     private SongService songService;
@@ -52,7 +56,7 @@ public class Activity3 extends AppCompatActivity implements TextWatcher, Adapter
         chosenSong = new Song("","");
 
         String inPlayerName = getIntent().getStringExtra("name");
-        int inPlayerImageIndex = getIntent().getIntExtra("image",0);
+        //int inPlayerImageIndex = getIntent().getByteExtra("image",new Byte(Byte.MIN_VALUE));
         playerId = getIntent().getIntExtra("id",0);
 
         playerName = findViewById(R.id.playerNameTextView);
@@ -61,12 +65,15 @@ public class Activity3 extends AppCompatActivity implements TextWatcher, Adapter
         imageViewPhoto = findViewById(R.id.selectedPlayerImageView);
 
         playerName.setText(inPlayerName);
-        playerImage.setImageResource(playerProfilesDefault[inPlayerImageIndex]);
+        playerImage.setImageBitmap(getIntent().getParcelableExtra("image"));
+        editPlayerName.setText(getIntent().getStringExtra("name"));
 
         songService = new SongService(getApplicationContext());
 
         songSub = findViewById(R.id.songSubEntry);
         songSub.addTextChangedListener(this);
+
+        songSub.setText(getIntent().getStringExtra("song"));
 
         adapter = new KArrayAdapter<String>(this, android.R.layout.simple_list_item_1, searchResults);
         songSub.setAdapter(adapter);
@@ -74,7 +81,7 @@ public class Activity3 extends AppCompatActivity implements TextWatcher, Adapter
         songSub.setOnItemClickListener(this);
         getTracks();
 
-
+        myDb = new DatabaseHelper(Activity3.this);
     }
 
     @Override
@@ -113,11 +120,21 @@ public class Activity3 extends AppCompatActivity implements TextWatcher, Adapter
     public void onSaveChanges(View view){
         if (chosenSong.getName().equals(songSub.getText().toString())){
             Intent intent = new Intent(this,Activity2.class);
-            intent.putExtra("song", chosenSong.getName());
-            intent.putExtra("songArtist", chosenSong.getArtist());
-            intent.putExtra("songid", chosenSong.getId());
-            intent.putExtra("id", playerId);
 
+            String writePlayerName = playerName.getText().toString().trim();
+            if (editPlayerName.getText()!=null){
+                writePlayerName = editPlayerName.getText().toString().trim();
+            }
+
+            Bitmap icon = BitmapFactory.decodeResource(Activity3.this.getResources(), playerImage.getId());
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            icon.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            byte[] b = baos.toByteArray();
+            String encodedImageString = Base64.encodeToString(b, Base64.DEFAULT);
+
+            byte[] bytarray = Base64.decode(encodedImageString, Base64.DEFAULT);
+
+            myDb.updateData(Integer.toString(playerId),writePlayerName,chosenSong.getName(),chosenSong.getId(),chosenSong.getArtist(),bytarray);
             startActivity(intent);
         }
         else{
@@ -139,6 +156,7 @@ public class Activity3 extends AppCompatActivity implements TextWatcher, Adapter
         super.onActivityResult(requestCode, resultCode, data);
         Bitmap photo = (Bitmap) data.getExtras().get("data");
         imageViewPhoto.setImageBitmap(photo);
+        playerImage.setImageBitmap(photo);
     }
 
 

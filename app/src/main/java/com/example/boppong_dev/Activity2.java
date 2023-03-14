@@ -7,13 +7,18 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.Image;
 import android.media.ToneGenerator;
 import android.os.Bundle;
 import android.os.VibrationEffect;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -29,6 +34,9 @@ import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 public class Activity2 extends AppCompatActivity implements RecyclerViewInterface, SensorEventListener {
@@ -44,6 +52,7 @@ public class Activity2 extends AppCompatActivity implements RecyclerViewInterfac
     private SharedPreferences.Editor editor;
     int currentRound, roundLimit=3;
     TextView roundView;
+    DatabaseHelper myDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,12 +64,15 @@ public class Activity2 extends AppCompatActivity implements RecyclerViewInterfac
         roundView = findViewById(R.id.roundView);
         roundView.setText("Current round: "+currentRound);
 
+        myDb = new DatabaseHelper(Activity2.this);
+        //fetchPlayers();
+
         if (currentRound>roundLimit){
             reset();
         }
 
         RecyclerView recyclerView = findViewById(R.id.playerRecyclerView);
-        setUpPlayers();
+        //setUpPlayers();
         players_recyclerViewAdapter adapter = new players_recyclerViewAdapter(this,players,this);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -83,13 +95,6 @@ public class Activity2 extends AppCompatActivity implements RecyclerViewInterfac
         startActivity(intent);
     }
 
-    private void setUpPlayers(){
-        String[] playerNames = getResources().getStringArray(R.array.testPlayers);
-        for (int i=0;i<playerNames.length;i++){
-            players.add(new Player(i,playerNames[i],new Song("i","y"),playerProfilesDefault[i]));
-        }
-    }
-
     private boolean playersReady(){
         boolean areReady = true;
         for (int i=0;i<players.size();i++){
@@ -105,9 +110,17 @@ public class Activity2 extends AppCompatActivity implements RecyclerViewInterfac
     public void onItemClick(int position) {
         Intent intent = new Intent(this,Activity3.class);
 
+        Bitmap icon = players.get(position).getImage();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        icon.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] b = baos.toByteArray();
+        String encodedImageString = Base64.encodeToString(b, Base64.DEFAULT);
+
+        byte[] bytarray = Base64.decode(encodedImageString, Base64.DEFAULT);
+
         intent.putExtra("id", players.get(position).getId());
         intent.putExtra("name", players.get(position).getName());
-        intent.putExtra("image", position);
+        intent.putExtra("image", bytarray);
         intent.putExtra("song", players.get(position).getSongSubmission().getName());
 
         startActivity(intent);
@@ -116,6 +129,7 @@ public class Activity2 extends AppCompatActivity implements RecyclerViewInterfac
     @Override
     protected void onResume() {
         super.onResume();
+        fetchPlayers();
         sensorManager.registerListener(this, gyro, SensorManager.SENSOR_DELAY_NORMAL);
         if (getIntent().hasExtra("songid")){
             String songUpdate = getIntent().getStringExtra("song");
@@ -150,5 +164,31 @@ public class Activity2 extends AppCompatActivity implements RecyclerViewInterfac
     protected void onPause(){
         sensorManager.unregisterListener(this);
         super.onPause();
+    }
+
+    protected void fetchPlayers(){
+        Cursor cursor = myDb.readAllData();
+        if (cursor.getCount()==0){
+            Toast.makeText(Activity2.this,"no data", Toast.LENGTH_SHORT).show();
+        }
+        else{
+            while(cursor.moveToNext()){
+                players.add(new Player(Integer.parseInt(cursor.getString(0)),cursor.getString(1)
+                ,new Song(cursor.getString(3),cursor.getString(4)),Bytes2Bitmap(cursor.getBlob(2))));
+            }
+        }
+    }
+
+    public final static Bitmap Bytes2Bitmap(byte[] b) {
+        if (b == null) {
+            return null;
+        }
+        if (b.length != 0) {
+            InputStream is = new ByteArrayInputStream(b);
+            Bitmap bmp = BitmapFactory.decodeStream(is);
+            return bmp;
+        } else {
+            return null;
+        }
     }
 }

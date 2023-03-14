@@ -5,14 +5,13 @@ import java.sql.Struct;
 import java.util.ArrayList;
 
 public class Song {
-
-    private String id;
+    private String uri;
     private String name;
     private ArrayList<Artist> artists;
 
     public Song(String id, String name) {
         this.name = name;
-        this.id = id;
+        this.uri = id.replace("spotify:track:","");
         artists = new ArrayList<Artist>();
     }
 
@@ -25,11 +24,11 @@ public class Song {
     }
 
     public String getId() {
-        return id;
+        return uri;
     }
 
     public void setId(String id) {
-        this.id = id;
+        this.uri = id;
     }
 
     public String getName() {
@@ -39,5 +38,4 @@ public class Song {
     public void setName(String name) {
         this.name = name;
     }
-
 }

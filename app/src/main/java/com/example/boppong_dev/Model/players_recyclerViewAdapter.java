@@ -1,6 +1,8 @@
 package com.example.boppong_dev.Model;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.drawable.BitmapDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,7 +44,7 @@ public class players_recyclerViewAdapter extends RecyclerView.Adapter<players_re
         else{
             holder.playerStatus.setText("unSubbed");
         }
-        holder.playerPicture.setImageResource(players.get(position).getImage());
+        holder.playerPicture.setImageBitmap(players.get(position).getImage());
     }
 
     @Override
