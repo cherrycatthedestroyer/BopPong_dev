@@ -12,9 +12,10 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/textView"
+            android:id="@+id/roundView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@color/BPred"
             android:text="TextView" />
 
         <androidx.recyclerview.widget.RecyclerView

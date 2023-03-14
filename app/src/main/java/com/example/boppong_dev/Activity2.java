@@ -35,45 +35,35 @@ public class Activity2 extends AppCompatActivity implements RecyclerViewInterfac
     ArrayList<Player> players = new ArrayList<>();
     int[] playerProfilesDefault = {R.drawable.testprofile1,R.drawable.testprofile2
             ,R.drawable.testprofile3,R.drawable.testprofile4,R.drawable.testprofile5,R.drawable.testprofile6};
-    private TextView userView;
-    private TextView songView;
-    private Button pauseBtn;
-    private Song song;
-
-    private SongService songService;
-    private ArrayList<Song> searchResults;
-
-    private static final String CLIENT_ID = "a24f9f02a4fc4adb8138143d99bd8dc9";
-    private static final String REDIRECT_URI = "https://www.youtube.com/";
-    private SpotifyAppRemote mSpotifyAppRemote;
-    ConnectionParams connectionParams =
-            new ConnectionParams.Builder(CLIENT_ID)
-                    .setRedirectUri(REDIRECT_URI)
-                    .showAuthView(true)
-                    .build();
 
     SensorManager sensorManager;
     ArrayList<Sensor> sensors;
     ArrayList<String> sensorList = new ArrayList<String>();
     Sensor gyro;
+    private SharedPreferences msharedPreferences;
+    private SharedPreferences.Editor editor;
+    int currentRound, roundLimit=3;
+    TextView roundView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_2);
 
-        songService = new SongService(getApplicationContext());
+        msharedPreferences = getSharedPreferences("GAME",MODE_PRIVATE);
+        currentRound = msharedPreferences.getInt("currentRound",0);
+        roundView = findViewById(R.id.roundView);
+        roundView.setText("Current round: "+currentRound);
 
-        SharedPreferences sharedPreferences = this.getSharedPreferences("SPOTIFY", 0);
-        //userView.setText(sharedPreferences.getString("userid", "No User"));
+        if (currentRound>roundLimit){
+            reset();
+        }
 
         RecyclerView recyclerView = findViewById(R.id.playerRecyclerView);
         setUpPlayers();
         players_recyclerViewAdapter adapter = new players_recyclerViewAdapter(this,players,this);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        //getTracks();
-        //connected();
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         sensors = new ArrayList<Sensor>(sensorManager.getSensorList(Sensor.TYPE_ALL));
@@ -83,6 +73,14 @@ public class Activity2 extends AppCompatActivity implements RecyclerViewInterfac
                 gyro = sensorManager.getDefaultSensor(sensors.get(i).getType());
             }
         }
+    }
+
+    private void reset(){
+        editor = msharedPreferences.edit();
+        editor.putInt("currentRound", 0);
+        editor.commit();
+        Intent intent = new Intent(this,MainActivity.class);
+        startActivity(intent);
     }
 
     private void setUpPlayers(){
@@ -101,47 +99,6 @@ public class Activity2 extends AppCompatActivity implements RecyclerViewInterfac
             }
         }
         return areReady;
-    }
-
-    private void getTracks() {
-        songService.searchTrack(() -> {
-            searchResults = songService.getSongs();
-            updateSong();
-        });
-    }
-
-    private void updateSong() {
-        if (searchResults.size() > 0) {
-            //songView.setText(searchResults.get(0).getName());
-            song = searchResults.get(0);
-        }
-    }
-
-    private void connected() {
-        SpotifyAppRemote.connect(this, connectionParams,
-                new Connector.ConnectionListener() {
-
-                    @Override
-                    public void onConnected(SpotifyAppRemote spotifyAppRemote) {
-                        mSpotifyAppRemote = spotifyAppRemote;
-                        mSpotifyAppRemote.getPlayerApi().play("spotify:track:"+song.getId());
-                    }
-
-                    @Override
-                    public void onFailure(Throwable throwable) {
-                        Log.e("MainActivity", throwable.getMessage(), throwable);
-                    }
-                });
-    }
-
-    public void songStop(View v){
-        mSpotifyAppRemote.getPlayerApi().pause();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        SpotifyAppRemote.disconnect(mSpotifyAppRemote);
     }
 
     @Override
@@ -177,8 +134,8 @@ public class Activity2 extends AppCompatActivity implements RecyclerViewInterfac
             if (type==gyro.getType()){
                 if (event.values[0]==-1.0){
                     if (playersReady()){
-                        //Intent intent = new Intent(this,startRound.class);
-                        //startActivity(intent);
+                        Intent intent = new Intent(this,startRound.class);
+                        startActivity(intent);
                     }
                 }
             }

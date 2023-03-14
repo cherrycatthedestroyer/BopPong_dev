@@ -8,6 +8,10 @@
     <string name="saveChanges">Save changes</string>
     <string name="editName">edit name</string>
     <string name="selectSong">select song</string>
+    <string name="plus">+</string>
+    <string name="minus">-</string>
+    <string name="begin">Begin</string>
+    <string name="nameHidden">Who picked it?</string>
     <string-array name="testPlayers">
         <item>Josh</item>
         <item>Nathan</item>

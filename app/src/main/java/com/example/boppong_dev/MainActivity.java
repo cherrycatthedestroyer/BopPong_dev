@@ -7,6 +7,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -26,30 +28,38 @@ import com.spotify.sdk.android.auth.AuthorizationRequest;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener{
     private static final String CLIENT_ID = "a24f9f02a4fc4adb8138143d99bd8dc9";
     private static final String REDIRECT_URI = "https://www.youtube.com/";
     private SpotifyAppRemote mSpotifyAppRemote;
 
-    private RequestQueue mRequestQueue;
-    private StringRequest mStringRequest;
-    private String url = "https://api.spotify.com/v1/search?q=hair%20down&type=track&limit=3&offset=5";
+    protected RequestQueue mRequestQueue;
+    protected StringRequest mStringRequest;
+    protected String url = "https://api.spotify.com/v1/search?q=hair%20down&type=track&limit=3&offset=5";
 
     private static final int REQUEST_CODE = 1337;
     private SharedPreferences.Editor editor;
-    private SharedPreferences msharedPreferences;
-    AuthorizationRequest.Builder builder =
+    protected SharedPreferences msharedPreferences;
+    protected AuthorizationRequest.Builder builder =
             new AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI);
+
+    protected Button minus,plus,start;
+    protected TextView playerCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        builder.setScopes(new String[]{"streaming"});
-        AuthorizationRequest request = builder.build();
-        AuthorizationClient.openLoginActivity(this, REQUEST_CODE, request);
-        msharedPreferences = this.getSharedPreferences("SPOTIFY", 0);
-        mRequestQueue = Volley.newRequestQueue(this);
+
+        playerCount = findViewById(R.id.playerCountView);
+        plus = findViewById(R.id.increaseGroupView);
+        minus = findViewById(R.id.reduceGroupView);
+        start = findViewById(R.id.startGame);
+        plus.setOnClickListener(this);
+        minus.setOnClickListener(this);
+        start.setOnClickListener(this);
+
+        playerCount.setText("0");
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
@@ -101,5 +111,26 @@ public class MainActivity extends AppCompatActivity {
     private void startActivity2() {
         Intent newIntent = new Intent(MainActivity.this, Activity2.class);
         startActivity(newIntent);
+    }
+
+    @Override
+    public void onClick(View v) {
+        int value = Integer.parseInt(playerCount.getText().toString());
+        if (v.getId()==plus.getId()){
+            value++;
+        }
+        else if (value>0){
+            if (v.getId()==minus.getId()){
+                value--;
+            }
+            else if (v.getId()==start.getId()){
+                builder.setScopes(new String[]{"streaming"});
+                AuthorizationRequest request = builder.build();
+                AuthorizationClient.openLoginActivity(this, REQUEST_CODE, request);
+                msharedPreferences = this.getSharedPreferences("SPOTIFY", 0);
+                mRequestQueue = Volley.newRequestQueue(this);
+            }
+        }
+        playerCount.setText(Integer.toString(value));
     }
 }
