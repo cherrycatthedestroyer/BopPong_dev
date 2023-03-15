@@ -139,6 +139,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 DatabaseHelper playerDb = new DatabaseHelper(MainActivity.this);
 
                 for (int i=0;i<value;i++){
+                    //converting drawable into bitmap and then into byte[] to store in sql
                     Bitmap icon = BitmapFactory.decodeResource(MainActivity.this.getResources(),
                             playerProfilesDefault[i]);
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();

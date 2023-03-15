@@ -65,14 +65,12 @@ public class Activity2 extends AppCompatActivity implements RecyclerViewInterfac
         roundView.setText("Current round: "+currentRound);
 
         myDb = new DatabaseHelper(Activity2.this);
-        //fetchPlayers();
 
         if (currentRound>roundLimit){
             reset();
         }
 
         RecyclerView recyclerView = findViewById(R.id.playerRecyclerView);
-        //setUpPlayers();
         players_recyclerViewAdapter adapter = new players_recyclerViewAdapter(this,players,this);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -109,6 +107,8 @@ public class Activity2 extends AppCompatActivity implements RecyclerViewInterfac
     @Override
     public void onItemClick(int position) {
         Intent intent = new Intent(this,Activity3.class);
+
+        //converting bitmap into byte[] to store as paracable extra
 
         Bitmap icon = players.get(position).getImage();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -173,6 +173,7 @@ public class Activity2 extends AppCompatActivity implements RecyclerViewInterfac
         }
         else{
             while(cursor.moveToNext()){
+                //the image is converted from byte[] to bitmap using bytes2bitmap()
                 players.add(new Player(Integer.parseInt(cursor.getString(0)),cursor.getString(1)
                 ,new Song(cursor.getString(3),cursor.getString(4)),Bytes2Bitmap(cursor.getBlob(2))));
             }

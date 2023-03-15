@@ -56,7 +56,6 @@ public class Activity3 extends AppCompatActivity implements TextWatcher, Adapter
         chosenSong = new Song("","");
 
         String inPlayerName = getIntent().getStringExtra("name");
-        //int inPlayerImageIndex = getIntent().getByteExtra("image",new Byte(Byte.MIN_VALUE));
         playerId = getIntent().getIntExtra("id",0);
 
         playerName = findViewById(R.id.playerNameTextView);
@@ -65,6 +64,7 @@ public class Activity3 extends AppCompatActivity implements TextWatcher, Adapter
         imageViewPhoto = findViewById(R.id.selectedPlayerImageView);
 
         playerName.setText(inPlayerName);
+        //setting the byte[] as bitmap image, didnt ask me to convert, should I ? test this
         playerImage.setImageBitmap(getIntent().getParcelableExtra("image"));
         editPlayerName.setText(getIntent().getStringExtra("name"));
 
@@ -125,6 +125,8 @@ public class Activity3 extends AppCompatActivity implements TextWatcher, Adapter
             if (editPlayerName.getText()!=null){
                 writePlayerName = editPlayerName.getText().toString().trim();
             }
+
+            //converting drawable into bitmap and then into byte[] to store in sql
 
             Bitmap icon = BitmapFactory.decodeResource(Activity3.this.getResources(), playerImage.getId());
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
