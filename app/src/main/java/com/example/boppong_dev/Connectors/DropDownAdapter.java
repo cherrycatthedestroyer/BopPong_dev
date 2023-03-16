@@ -9,14 +9,12 @@ import android.widget.ArrayAdapter;
 import android.widget.Filter;
 import android.widget.TextView;
 import com.example.boppong_dev.Model.Song;
-import androidx.annotation.NonNull;
 
-import com.example.boppong_dev.Model.players_recyclerViewAdapter;
 import com.example.boppong_dev.R;
 
 import java.util.List;
 
-public class KArrayAdapter<T>
+public class DropDownAdapter<T>
         extends ArrayAdapter<T>
 {
     private Filter filter = new KNoFilter();
@@ -27,8 +25,8 @@ public class KArrayAdapter<T>
         return filter;
     }
 
-    public KArrayAdapter(Context context, int textViewResourceId,
-                         List<Song> objects) {
+    public DropDownAdapter(Context context, int textViewResourceId,
+                           List<Song> objects) {
         super(context, textViewResourceId, (List<T>) objects);
         Log.v("Krzys", "Adapter created " + filter);
         items = objects;

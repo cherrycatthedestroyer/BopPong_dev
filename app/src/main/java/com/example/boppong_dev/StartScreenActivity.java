@@ -12,33 +12,23 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 
 import com.example.boppong_dev.Connectors.UserService;
-import com.example.boppong_dev.Model.Song;
 import com.example.boppong_dev.Model.User;
-import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
 
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.spotify.sdk.android.auth.AuthorizationClient;
 import com.spotify.sdk.android.auth.AuthorizationRequest;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectOutputStream;
 
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener{
+public class StartScreenActivity extends AppCompatActivity implements View.OnClickListener{
     private static final String CLIENT_ID = "a24f9f02a4fc4adb8138143d99bd8dc9";
     private static final String REDIRECT_URI = "https://www.youtube.com/";
     private SpotifyAppRemote mSpotifyAppRemote;
@@ -61,10 +51,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        DatabaseHelper playerDb = new DatabaseHelper(MainActivity.this);
+        setContentView(R.layout.start_screen);
+
+        //wipe database before creation of new lobby (prevents old users from existing)
+        DatabaseHelper playerDb = new DatabaseHelper(StartScreenActivity.this);
         playerDb.wipe();
 
+        //setting up view objects
         playerCount = findViewById(R.id.playerCountView);
         plus = findViewById(R.id.increaseGroupView);
         minus = findViewById(R.id.reduceGroupView);
@@ -76,6 +69,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         playerCount.setText("0");
     }
 
+
+    // spotify boiler plate code for establishing user to connect to spotify server for api usage
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
@@ -109,6 +104,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    //function called within onActivityResult to authenticate spotify user making use of api
     private void waitForUserInfo() {
         UserService userService = new UserService(mRequestQueue, msharedPreferences);
         userService.get(() -> {
@@ -122,11 +118,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
+    //Takes user to the lobby
     private void startActivity2() {
-        Intent newIntent = new Intent(MainActivity.this, Activity2.class);
+        Intent newIntent = new Intent(StartScreenActivity.this, LobbyActivity.class);
         startActivity(newIntent);
     }
 
+    //selecting how many players will be in the game and generating their objects and adding that to database
     @Override
     public void onClick(View v) {
         int value = Integer.parseInt(playerCount.getText().toString());
@@ -138,11 +136,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 value--;
             }
             else if (v.getId()==start.getId()){
-                DatabaseHelper playerDb = new DatabaseHelper(MainActivity.this);
+                DatabaseHelper playerDb = new DatabaseHelper(StartScreenActivity.this);
 
                 for (int i=0;i<value;i++){
                     //converting drawable into bitmap and then into byte[] to store in sql
-                    Bitmap icon = BitmapFactory.decodeResource(MainActivity.this.getResources(),
+                    Bitmap icon = BitmapFactory.decodeResource(StartScreenActivity.this.getResources(),
                             playerProfilesDefault[i]);
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     icon.compress(Bitmap.CompressFormat.PNG, 100, baos);
@@ -150,9 +148,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     String encodedImageString = Base64.encodeToString(b, Base64.DEFAULT);
 
                     byte[] bytarray = Base64.decode(encodedImageString, Base64.DEFAULT);
+
+                    //adding player object to database
                     playerDb.addPlayer(i,bytarray,null,null,null);
                 }
 
+                //initiates the spotify connection process that calls the functions above
                 builder.setScopes(new String[]{"streaming"});
                 AuthorizationRequest request = builder.build();
                 AuthorizationClient.openLoginActivity(this, REQUEST_CODE, request);

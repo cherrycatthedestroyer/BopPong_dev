@@ -14,19 +14,19 @@
         android:theme="@style/Theme.BopPong_dev"
         tools:targetApi="31">
         <activity
-            android:name=".startRound"
+            android:name=".StartRoundActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity4"
+            android:name=".RoundActivity"
             android:exported="false" />
         <activity
-            android:name=".Activity3"
+            android:name=".UserEditActivity"
             android:exported="false" />
         <activity
-            android:name=".Activity2"
+            android:name=".LobbyActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".StartScreenActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

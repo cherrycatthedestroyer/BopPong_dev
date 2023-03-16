@@ -48,6 +48,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    //adds player to database with all its information
     void addPlayer(int playerIndex, byte[] playerImage, String playerSongId, String playerSong, String playerSongArtist){
         SQLiteDatabase db = getWritableDatabase();
         ContentValues cv = new ContentValues();
@@ -66,10 +67,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    //clears table of player data
     protected void wipe(){
         getWritableDatabase().execSQL("delete from "+ TABLE_NAME);
     }
 
+    //retrieves all player data in table
     protected Cursor readAllData(){
         String query = "SELECT * FROM " + TABLE_NAME;
         SQLiteDatabase db = getReadableDatabase();
@@ -80,6 +83,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return cursor;
     }
 
+    //updates edited player data
     void updateData(String row_id, String playerName, String playerSong, String playerSongId, String playerSongArtist, byte[] playerImage){
         SQLiteDatabase db = getWritableDatabase();
         ContentValues cv = new ContentValues();
@@ -99,6 +103,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    //retrieves player image based on id
     Cursor getProfileImage(String row_id){
         String query = "SELECT image FROM " + TABLE_NAME + " WHERE id = ? LIMIT 1";
         SQLiteDatabase db = getReadableDatabase();

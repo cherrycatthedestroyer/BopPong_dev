@@ -7,7 +7,7 @@
     android:layout_margin="0dp"
     android:background="@color/BPred"
     android:onClick="onSaveChanges"
-    tools:context=".Activity3">
+    tools:context=".UserEditActivity">
 
     <LinearLayout
         android:id="@+id/linearLayout"

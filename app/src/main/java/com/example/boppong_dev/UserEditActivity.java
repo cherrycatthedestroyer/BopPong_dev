@@ -2,7 +2,6 @@ package com.example.boppong_dev;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -13,39 +12,29 @@ import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Base64;
-import android.util.Log;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.boppong_dev.Connectors.KArrayAdapter;
+import com.example.boppong_dev.Connectors.DropDownAdapter;
 import com.example.boppong_dev.Connectors.SongService;
-import com.example.boppong_dev.Model.Player;
 import com.example.boppong_dev.Model.Song;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-public class Activity3 extends AppCompatActivity implements TextWatcher, AdapterView.OnItemClickListener {
+public class UserEditActivity extends AppCompatActivity implements TextWatcher, AdapterView.OnItemClickListener {
     DatabaseHelper myDb;
-    int[] playerProfilesDefault = {R.drawable.testprofile1,R.drawable.testprofile2
-            ,R.drawable.testprofile3,R.drawable.testprofile4,R.drawable.testprofile5,R.drawable.testprofile6};
     private SongService songService;
     AutoCompleteTextView songSub;
     ArrayList<Song> searchResults = new ArrayList<>();
-    KArrayAdapter<String> adapter;
+    DropDownAdapter<String> adapter;
     TextView playerName;
     EditText editPlayerName;
     ImageView playerImage;
@@ -53,17 +42,19 @@ public class Activity3 extends AppCompatActivity implements TextWatcher, Adapter
     Song chosenSong;
     ImageView imageViewPhoto;
     private static final int img_id = 123;
-    InputMethodManager inputManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_3);
+        setContentView(R.layout.user_edit_activity);
 
-        myDb = new DatabaseHelper(Activity3.this);
+        //opens up sql database
+        myDb = new DatabaseHelper(UserEditActivity.this);
 
+        //variable that holds song selected from search
         chosenSong = new Song("","");
 
+        //loading data from intent
         String inPlayerName = getIntent().getStringExtra("name");
         playerId = getIntent().getIntExtra("id",0);
 
@@ -73,10 +64,10 @@ public class Activity3 extends AppCompatActivity implements TextWatcher, Adapter
         imageViewPhoto = findViewById(R.id.selectedPlayerImageView);
 
         playerName.setText(inPlayerName);
-        //setting the byte[] as bitmap image, didnt ask me to convert, should I ? test this
+        //setting the byte[] as bitmap image from the sql database by searching by id
         Cursor cursor = myDb.getProfileImage(Integer.toString(playerId));
         if (cursor.getCount()==0){
-            Toast.makeText(Activity3.this,"no data", Toast.LENGTH_SHORT).show();
+            Toast.makeText(UserEditActivity.this,"no data", Toast.LENGTH_SHORT).show();
         }
         else{
             while(cursor.moveToNext()){
@@ -92,10 +83,13 @@ public class Activity3 extends AppCompatActivity implements TextWatcher, Adapter
 
         songSub.setText(getIntent().getStringExtra("song"));
 
-        adapter = new KArrayAdapter<String>(this, android.R.layout.simple_list_item_1, searchResults);
+        //custom dropdown box that requires custom view to inflate results with
+        adapter = new DropDownAdapter<String>(this, android.R.layout.simple_list_item_1, searchResults);
         songSub.setAdapter(adapter);
+        //how many characters type before entrybox prompt is used for song search
         songSub.setThreshold(3);
         songSub.setOnItemClickListener(this);
+        //song search
         getTracks();
     }
 
@@ -109,6 +103,7 @@ public class Activity3 extends AppCompatActivity implements TextWatcher, Adapter
 
     }
 
+    //triggering the search function when 3 characters or more are entered in song search textbox
     @Override
     public void afterTextChanged(Editable s){
         if (songSub.isFocused()){
@@ -118,8 +113,11 @@ public class Activity3 extends AppCompatActivity implements TextWatcher, Adapter
         }
     }
 
+    //search for songs based on text entry prompt
     private void getTracks() {
+            //prompt sent to song search class
             songService.setInputSong(songSub.getText().toString());
+            //song search results returns an array of song objects that match the text entry prompt
             songService.searchTrack(() ->  {
                 if (searchResults.size()>0){
                     searchResults.clear();
@@ -127,20 +125,24 @@ public class Activity3 extends AppCompatActivity implements TextWatcher, Adapter
                 for (int i=0; i<songService.getSongs().size();i++){
                     searchResults.add(songService.getSongs().get(i));
                 }
+                //clears search results, ready for next search if it happens so it can happy like autocorrect
                 songService.clearSongs();
             });
+            //dropdown box updated with search results
             songSub.setAdapter(adapter);
     }
 
+    //updating edited player data to database then sends them back to the lobby screen
     public void onSaveChanges(View view){
         String writePlayerName = playerName.getText().toString().trim();
+        //only triggers if a song is selected
         if (chosenSong.getName().equals(songSub.getText().toString())){
-            Intent intent = new Intent(this,Activity2.class);
+            Intent intent = new Intent(this, LobbyActivity.class);
             if (editPlayerName.getText()!=null){
                 writePlayerName = editPlayerName.getText().toString().trim();
             }
 
-            //converting drawable into bitmap and then into byte[] to store in sql
+            //converting drawable into bitmap and then into byte[] to store in sql SOURCED
 
             Bitmap icon = ((BitmapDrawable)playerImage.getDrawable()).getBitmap();
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -154,20 +156,24 @@ public class Activity3 extends AppCompatActivity implements TextWatcher, Adapter
             startActivity(intent);
         }
         else{
+            Toast.makeText(this,"please select  a song", Toast.LENGTH_SHORT).show();
             songSub.requestFocus();
         }
     }
 
+    //selects song from dropdown search options
     public void onItemClick(AdapterView<?> parent, View view, int position, long rowId) {
         Song selection = (Song) parent.getItemAtPosition(position);
         chosenSong = selection;
     }
 
+    //intent redirects user to camera
     public void goToCamera (View view){
         Intent camera_intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         startActivityForResult(camera_intent, img_id);
     }
 
+    //sets picture from camera as the player image
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Bitmap photo = (Bitmap) data.getExtras().get("data");
@@ -175,6 +181,7 @@ public class Activity3 extends AppCompatActivity implements TextWatcher, Adapter
         playerImage.setImageBitmap(photo);
     }
 
+    //SOURCED function to convert bytes to bitmap
     public final static Bitmap Bytes2Bitmap(byte[] b) {
         if (b == null) {
             return null;

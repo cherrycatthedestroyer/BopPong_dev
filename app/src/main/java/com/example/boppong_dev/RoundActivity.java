@@ -12,7 +12,6 @@ import android.os.SystemClock;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,7 +26,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-public class MainActivity4 extends AppCompatActivity {
+public class RoundActivity extends AppCompatActivity {
     DatabaseHelper myDb;
     ArrayList<Player> players = new ArrayList<>();
 
@@ -44,9 +43,10 @@ public class MainActivity4 extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main4);
+        setContentView(R.layout.round_activity);
 
-        myDb = new DatabaseHelper(MainActivity4.this);
+        //players loaded in from sql database
+        myDb = new DatabaseHelper(RoundActivity.this);
         fetchPlayers();
 
         clockTimeView = findViewById(R.id.clockTimeView);
@@ -57,9 +57,13 @@ public class MainActivity4 extends AppCompatActivity {
         gameStateView = findViewById(R.id.gameStateView);
         gameStateView.setText("guessing");
 
+        //round number loaded from shared preferences
         msharedPreferences = getSharedPreferences("GAME",MODE_PRIVATE);
         prevRound = msharedPreferences.getInt("currentRound",0);
 
+        //This listener is responsible for changing the view data depending on what game state
+        //It is being used as an event listener where view data is updated depending on the state its in
+        //the app is in either GUESSING or LISTENING
         clockTimeView.addTextChangedListener(new TextWatcher() {
 
             @Override
@@ -72,6 +76,7 @@ public class MainActivity4 extends AppCompatActivity {
                                           int count, int after) {
             }
 
+            //resets the clock after GUESSING state is completed
             @Override
             public void onTextChanged(CharSequence s, int start,
                                       int before, int count) {
@@ -83,20 +88,23 @@ public class MainActivity4 extends AppCompatActivity {
         });
     }
 
+    //SOURCED from spotify sdk setup, modified to work for our needs
     protected void onStart() {
         super.onStart();
+        //string that contains user authentication details to use spotify app as music player
         ConnectionParams connectionParams =
                 new ConnectionParams.Builder(CLIENT_ID)
                         .setRedirectUri(REDIRECT_URI)
                         .showAuthView(true)
                         .build();
 
+        //connected to spotify app to use as remote
         SpotifyAppRemote.connect(this, connectionParams,
                 new Connector.ConnectionListener() {
 
                     public void onConnected(SpotifyAppRemote spotifyAppRemote) {
                         mSpotifyAppRemote = spotifyAppRemote;
-                        Log.d("MainActivity", "Connected! Yay!");
+                        Log.d("RoundActivity", "Connected");
 
                         // Now you can start interacting with App Remote
                         connected();
@@ -104,9 +112,9 @@ public class MainActivity4 extends AppCompatActivity {
                     }
 
                     public void onFailure(Throwable throwable) {
-                        Log.e("MyActivity", throwable.getMessage(), throwable);
+                        Log.e("RoundActivity", throwable.getMessage(), throwable);
 
-                        // Something went wrong when attempting to connect! Handle errors here
+                        // didn't connect
                     }
                 });
     }
@@ -117,8 +125,9 @@ public class MainActivity4 extends AppCompatActivity {
         SpotifyAppRemote.disconnect(mSpotifyAppRemote);
     }
 
+    //Using spotify app music player
     private void connected() {
-        // Play a playlist
+        // start GUESSING state
         startCounting(players.size());
 
         // Subscribe to PlayerState
@@ -132,6 +141,7 @@ public class MainActivity4 extends AppCompatActivity {
                 });
     }
 
+    //Called in the listener for the
     protected String checkState(){
         String state = "guessing";
         nameRevealView.setText("Who picked it?");
@@ -141,11 +151,13 @@ public class MainActivity4 extends AppCompatActivity {
         return state;
     }
 
+    //Clock to countdown to time limit for GUESSING state
     protected int countDown(int playerNumber, int playerIndex){
         int i =Integer.parseInt(countLimit);
         while (i>-2){
             count = String.valueOf(i);
             this.runOnUiThread(new Runnable() {
+                //view is updated
                 @Override
                 public void run() {
                     clockTimeView.setText(count);
@@ -158,6 +170,7 @@ public class MainActivity4 extends AppCompatActivity {
         return i;
     }
 
+    //function responsible for revealing player name when state is changed
     protected void togglePlayerName(int playerIndex,int toggle){
         this.runOnUiThread(new Runnable() {
             @Override
@@ -172,6 +185,7 @@ public class MainActivity4 extends AppCompatActivity {
         });
     }
 
+    //increments round and stores it in shared pref internal memory
     protected void incrementRound(){
         this.runOnUiThread(new Runnable() {
             @Override
@@ -183,16 +197,20 @@ public class MainActivity4 extends AppCompatActivity {
         });
     }
 
+    //count variable and count view text is reset when Guessing state is over
     protected void resetCount(){
         count=countLimit;
         clockTimeView.setText(countLimit);
     }
 
+    //starts a new thread to count down for guessing state and play music to prevent
+    //main ui thread blockage
     public void startCounting (int playerNumber){
         Thread myThread = new Thread(new CountingThread(players.size()));
         myThread.start();
     }
 
+    //thread responsible for calling counting functions and playing songs using spotify app
     private class CountingThread implements Runnable
     {
         private int number;
@@ -203,23 +221,29 @@ public class MainActivity4 extends AppCompatActivity {
         @Override
         public void run() {
             for (int i=0;i<number;i++){
+                //plays spotify track using spotify app
                 mSpotifyAppRemote.getPlayerApi().play("spotify:track:"+players.get(i).getSongSubmission().getId());
+                //GUESSING state countdown
                 countDown(number,i);
+                //GUESSING state player hidden
                 togglePlayerName(i,0);
+                //pauses spotify song at the end of GUESSING state
                 mSpotifyAppRemote.getPlayerApi().pause();
+                //REVEAL state for 5 seconds
                 SystemClock.sleep(5000);
                 togglePlayerName(i,0);
             }
             incrementRound();
-            Intent newIntent = new Intent(MainActivity4.this, Activity2.class);
+            Intent newIntent = new Intent(RoundActivity.this, LobbyActivity.class);
             startActivity(newIntent);
         }
     }
 
+    //loads in players from sql database
     protected void fetchPlayers(){
         Cursor cursor = myDb.readAllData();
         if (cursor.getCount()==0){
-            Toast.makeText(MainActivity4.this,"no data", Toast.LENGTH_SHORT).show();
+            Toast.makeText(RoundActivity.this,"no data", Toast.LENGTH_SHORT).show();
         }
         else{
             while(cursor.moveToNext()){
@@ -229,6 +253,7 @@ public class MainActivity4 extends AppCompatActivity {
         }
     }
 
+    //SOURCED function to convert byted array to bitmap image
     public final static Bitmap Bytes2Bitmap(byte[] b) {
         if (b == null) {
             return null;

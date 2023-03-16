@@ -12,6 +12,7 @@ import com.google.gson.Gson;
 import java.util.HashMap;
 import java.util.Map;
 
+//SOURCED user authentication for the spotify api
 public class UserService {
 
     private static final String ENDPOINT = "https://api.spotify.com/v1/me";

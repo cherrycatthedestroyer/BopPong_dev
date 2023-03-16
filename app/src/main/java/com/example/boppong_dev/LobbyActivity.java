@@ -14,36 +14,23 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.media.Image;
-import android.media.ToneGenerator;
 import android.os.Bundle;
-import android.os.VibrationEffect;
 import android.util.Base64;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.boppong_dev.Connectors.SongService;
 import com.example.boppong_dev.Model.Player;
 import com.example.boppong_dev.Model.Song;
 import com.example.boppong_dev.Model.players_recyclerViewAdapter;
 import com.example.boppong_dev.Model.RecyclerViewInterface;
-import com.spotify.android.appremote.api.ConnectionParams;
-import com.spotify.android.appremote.api.Connector;
-import com.spotify.android.appremote.api.SpotifyAppRemote;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-public class Activity2 extends AppCompatActivity implements RecyclerViewInterface, SensorEventListener {
+public class LobbyActivity extends AppCompatActivity implements RecyclerViewInterface, SensorEventListener {
     ArrayList<Player> players = new ArrayList<>();
-    int[] playerProfilesDefault = {R.drawable.testprofile1,R.drawable.testprofile2
-            ,R.drawable.testprofile3,R.drawable.testprofile4,R.drawable.testprofile5,R.drawable.testprofile6};
-
     SensorManager sensorManager;
     ArrayList<Sensor> sensors;
     ArrayList<String> sensorList = new ArrayList<String>();
@@ -57,24 +44,28 @@ public class Activity2 extends AppCompatActivity implements RecyclerViewInterfac
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_2);
+        setContentView(R.layout.lobby_activity);
 
+        //opening internal storage to get current round and set it
         msharedPreferences = getSharedPreferences("GAME",MODE_PRIVATE);
         currentRound = msharedPreferences.getInt("currentRound",0);
         roundView = findViewById(R.id.roundView);
         roundView.setText("Current round: "+currentRound);
 
-        myDb = new DatabaseHelper(Activity2.this);
+        myDb = new DatabaseHelper(LobbyActivity.this);
 
+        //ends game if current round reaches the limit
         if (currentRound>roundLimit){
             reset();
         }
 
+        //inflating recycler view with user data
         RecyclerView recyclerView = findViewById(R.id.playerRecyclerView);
         players_recyclerViewAdapter adapter = new players_recyclerViewAdapter(this,players,this);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+        //setting up gyroscope using the orientation sensor (doesn't require data filtering)
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         sensors = new ArrayList<Sensor>(sensorManager.getSensorList(Sensor.TYPE_ALL));
         for (int i=0; i<sensors.size();i++){
@@ -85,15 +76,17 @@ public class Activity2 extends AppCompatActivity implements RecyclerViewInterfac
         }
     }
 
+    //resets internal and sql memory and brings user back to start screen
     private void reset(){
         myDb.wipe();
         editor = msharedPreferences.edit();
         editor.putInt("currentRound", 0);
         editor.commit();
-        Intent intent = new Intent(this,MainActivity.class);
+        Intent intent = new Intent(this, StartScreenActivity.class);
         startActivity(intent);
     }
 
+    //checks to see if all players have submitted a song
     private boolean playersReady(){
         boolean areReady = true;
         for (int i=0;i<players.size();i++){
@@ -105,9 +98,10 @@ public class Activity2 extends AppCompatActivity implements RecyclerViewInterfac
         return areReady;
     }
 
+    //triggered every time a player row is clicked and takes user to the edit player screen
     @Override
     public void onItemClick(int position) {
-        Intent intent = new Intent(this,Activity3.class);
+        Intent intent = new Intent(this, UserEditActivity.class);
 
         //converting bitmap into byte[] to store as paracable extra
 
@@ -119,6 +113,8 @@ public class Activity2 extends AppCompatActivity implements RecyclerViewInterfac
 
         byte[] bytarray = Base64.decode(encodedImageString, Base64.DEFAULT);
 
+        //technically don't need all of this, just the id and the rest can be retrieved from sql
+        //loads selected player data into the edit user screen
         intent.putExtra("id", players.get(position).getId());
         intent.putExtra("name", players.get(position).getName());
         intent.putExtra("image", bytarray);
@@ -127,11 +123,16 @@ public class Activity2 extends AppCompatActivity implements RecyclerViewInterfac
         startActivity(intent);
     }
 
+    //updating user data after it has been edited in user edit activity
     @Override
     protected void onResume() {
         super.onResume();
+        //updating users via sql database
         fetchPlayers();
+        //gyroscope activated
         sensorManager.registerListener(this, gyro, SensorManager.SENSOR_DELAY_NORMAL);
+        //we dont need this as fetchplayers updates the users from sql
+        //old method of passing back edit user data from user edit activity
         if (getIntent().hasExtra("songid")){
             String songUpdate = getIntent().getStringExtra("song");
             String songUpdateId = getIntent().getStringExtra("songid");
@@ -142,6 +143,8 @@ public class Activity2 extends AppCompatActivity implements RecyclerViewInterfac
         }
     }
 
+    //when phone is placed on table, players are checked to see if they have all submitted a song and if so
+    //game prompt is started
     @Override
     public void onSensorChanged(SensorEvent event) {
         int type = event.sensor.getType();
@@ -149,7 +152,7 @@ public class Activity2 extends AppCompatActivity implements RecyclerViewInterfac
             if (type==gyro.getType()){
                 if (event.values[0]==-1.0){
                     if (playersReady()){
-                        Intent intent = new Intent(this,startRound.class);
+                        Intent intent = new Intent(this, StartRoundActivity.class);
                         startActivity(intent);
                     }
                 }
@@ -162,15 +165,17 @@ public class Activity2 extends AppCompatActivity implements RecyclerViewInterfac
 
     }
 
+    //disable sensor when activity is not in use
     protected void onPause(){
         sensorManager.unregisterListener(this);
         super.onPause();
     }
 
+    //updates player array using player data from sql database
     protected void fetchPlayers(){
         Cursor cursor = myDb.readAllData();
         if (cursor.getCount()==0){
-            Toast.makeText(Activity2.this,"no data", Toast.LENGTH_SHORT).show();
+            Toast.makeText(LobbyActivity.this,"no data", Toast.LENGTH_SHORT).show();
         }
         else{
             while(cursor.moveToNext()){
@@ -181,6 +186,7 @@ public class Activity2 extends AppCompatActivity implements RecyclerViewInterfac
         }
     }
 
+    //sourced function that converts byte array to bitmap image
     public final static Bitmap Bytes2Bitmap(byte[] b) {
         if (b == null) {
             return null;

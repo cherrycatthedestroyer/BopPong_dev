@@ -22,6 +22,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringJoiner;
 
+
+
+//SOURCED but modified to fit our use
+//responsible for making api calls to spotify to retrieve song search results
+//data is processed and made into class objects
 public class SongService {
     private ArrayList<Song> songs = new ArrayList<>();
     private SharedPreferences sharedPreferences;
@@ -52,12 +57,15 @@ public class SongService {
     }
 
     public ArrayList<Song> searchTrack(final VolleyCallBack callBack) {
+        //api call url endpoint
         String endpointPt1 ="https://api.spotify.com/v1/search?q=";
         String endpointP2 = "&type=track&limit=5&offset=5";
         String endpoint = endpointPt1+inputSong+endpointP2;
+        //search results in JSON format, needs to  be processed
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
                 (Request.Method.GET, endpoint, null, response -> {
                     Gson gson = new Gson();
+                    //JSON code is proccessed and made into song objects
                     JSONArray jsonArray = response.optJSONObject("tracks").optJSONArray("items");
                     for (int n = 0; n < jsonArray.length(); n++) {
                         try{
@@ -90,6 +98,7 @@ public class SongService {
                 return headers;
             }
         };
+        //song object array returned
         queue.add(jsonObjectRequest);
         return songs;
     }
