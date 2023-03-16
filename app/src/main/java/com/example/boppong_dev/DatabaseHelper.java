@@ -103,6 +103,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    // theres alot of layers in the song
+    //how many?
+    //its very prince, if he llived in a cyber punk city
+    //whats the game?
+    //risk of rain 2
+    //is there electric guitar yet?
+    //oh yeah it came and went, we're on the second lull
+
     //retrieves player image based on id
     Cursor getProfileImage(String row_id){
         String query = "SELECT image FROM " + TABLE_NAME + " WHERE id = ? LIMIT 1";
