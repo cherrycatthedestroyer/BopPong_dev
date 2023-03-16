@@ -126,8 +126,7 @@ public class RoundActivity extends AppCompatActivity {
                 myDb.updateData(Integer.toString(currPlayer.getId()),currPlayer.getName(),null,null,null,bytarray);
             }
             incrementRound();
-            Intent newIntent = new Intent(RoundActivity.this, LobbyActivity.class);
-            startActivity(newIntent);
+            backToLobby();
         }
     }
 
@@ -236,6 +235,16 @@ public class RoundActivity extends AppCompatActivity {
                 editor = msharedPreferences.edit();
                 editor.putInt("currentRound", prevRound+1);
                 editor.commit();
+            }
+        });
+    }
+
+    protected void backToLobby(){
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Intent newIntent = new Intent(RoundActivity.this, LobbyActivity.class);
+                startActivity(newIntent);
             }
         });
     }

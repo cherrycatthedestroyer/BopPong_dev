@@ -96,10 +96,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         long result = db.update(TABLE_NAME,cv,"id=?",new String[]{row_id});
         if (result==-1){
-            Toast.makeText(context,"update failed", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(context,"update failed", Toast.LENGTH_SHORT).show();
         }
         else{
-            Toast.makeText(context,"success", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(context,"success", Toast.LENGTH_SHORT).show();
         }
     }
 
