@@ -56,6 +56,7 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
         //wipe database before creation of new lobby (prevents old users from existing)
         DatabaseHelper playerDb = new DatabaseHelper(StartScreenActivity.this);
         playerDb.wipe();
+        resetRound();
 
         //setting up view objects
         playerCount = findViewById(R.id.playerCountView);
@@ -162,5 +163,12 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
             }
         }
         playerCount.setText(Integer.toString(value));
+    }
+
+    protected void resetRound(){
+        msharedPreferences = getSharedPreferences("GAME",MODE_PRIVATE);
+        editor = msharedPreferences.edit();
+        editor.putInt("currentRound", 0);
+        editor.commit();
     }
 }

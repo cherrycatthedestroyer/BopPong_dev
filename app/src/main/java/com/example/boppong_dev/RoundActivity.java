@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Base64;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,6 +24,7 @@ import com.spotify.android.appremote.api.SpotifyAppRemote;
 import com.spotify.protocol.types.Track;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 
@@ -86,6 +88,47 @@ public class RoundActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    //thread responsible for calling counting functions and playing songs using spotify app
+    private class CountingThread implements Runnable
+    {
+        private int number;
+        public CountingThread(int playerNumber) {
+            number=playerNumber;
+        }
+
+        @Override
+        public void run() {
+            for (int i=0;i<number;i++){
+                //plays spotify track using spotify app
+                mSpotifyAppRemote.getPlayerApi().play("spotify:track:"+players.get(i).getSongSubmission().getId());
+                //GUESSING state countdown
+                countDown(number,i);
+                //GUESSING state player hidden
+                togglePlayerName(i,0);
+                //pauses spotify song at the end of GUESSING state
+                mSpotifyAppRemote.getPlayerApi().pause();
+                //REVEAL state for 5 seconds
+                SystemClock.sleep(5000);
+                togglePlayerName(i,0);
+            }
+            for (int i=0;i<number;i++){
+                Player currPlayer= players.get(i);
+                //converting drawable into bitmap and then into byte[] to store in sql
+                Bitmap icon = currPlayer.getImage();
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                icon.compress(Bitmap.CompressFormat.PNG, 100, baos);
+                byte[] b = baos.toByteArray();
+                String encodedImageString = Base64.encodeToString(b, Base64.DEFAULT);
+
+                byte[] bytarray = Base64.decode(encodedImageString, Base64.DEFAULT);
+                myDb.updateData(Integer.toString(currPlayer.getId()),currPlayer.getName(),null,null,null,bytarray);
+            }
+            incrementRound();
+            Intent newIntent = new Intent(RoundActivity.this, LobbyActivity.class);
+            startActivity(newIntent);
+        }
     }
 
     //SOURCED from spotify sdk setup, modified to work for our needs
@@ -208,35 +251,6 @@ public class RoundActivity extends AppCompatActivity {
     public void startCounting (int playerNumber){
         Thread myThread = new Thread(new CountingThread(players.size()));
         myThread.start();
-    }
-
-    //thread responsible for calling counting functions and playing songs using spotify app
-    private class CountingThread implements Runnable
-    {
-        private int number;
-        public CountingThread(int playerNumber) {
-            number=playerNumber;
-        }
-
-        @Override
-        public void run() {
-            for (int i=0;i<number;i++){
-                //plays spotify track using spotify app
-                mSpotifyAppRemote.getPlayerApi().play("spotify:track:"+players.get(i).getSongSubmission().getId());
-                //GUESSING state countdown
-                countDown(number,i);
-                //GUESSING state player hidden
-                togglePlayerName(i,0);
-                //pauses spotify song at the end of GUESSING state
-                mSpotifyAppRemote.getPlayerApi().pause();
-                //REVEAL state for 5 seconds
-                SystemClock.sleep(5000);
-                togglePlayerName(i,0);
-            }
-            incrementRound();
-            Intent newIntent = new Intent(RoundActivity.this, LobbyActivity.class);
-            startActivity(newIntent);
-        }
     }
 
     //loads in players from sql database
