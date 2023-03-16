@@ -66,6 +66,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    protected void wipe(){
+        getWritableDatabase().execSQL("delete from "+ TABLE_NAME);
+    }
+
     protected Cursor readAllData(){
         String query = "SELECT * FROM " + TABLE_NAME;
         SQLiteDatabase db = getReadableDatabase();
@@ -93,5 +97,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         else{
             Toast.makeText(context,"success", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    Cursor getProfileImage(String row_id){
+        String query = "SELECT image FROM " + TABLE_NAME + " WHERE id = ? LIMIT 1";
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = null;
+        if (db != null){
+            cursor= db.rawQuery(query,new String[]{row_id});
+        }
+        return cursor;
     }
 }

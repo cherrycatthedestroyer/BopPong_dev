@@ -29,18 +29,10 @@ import java.util.ArrayList;
 
 public class MainActivity4 extends AppCompatActivity {
     DatabaseHelper myDb;
-
-    private ArrayList<String> songList, playerList;
     ArrayList<Player> players = new ArrayList<>();
 
-    //String[] playerNames = {"josh","nathan","ahmik"};
-    //String[] playerSongs = {"4sFzG7iUlyPmuyASCkre9A","6ljK8pycxEv0Yqn1cdxvME","0JXXNGljqupsJaZsgSbMZV"};
-
-    int[] playerProfilesDefault = {R.drawable.testprofile1,R.drawable.testprofile2
-            ,R.drawable.testprofile3,R.drawable.testprofile4,R.drawable.testprofile5,R.drawable.testprofile6};
-
     TextView clockTimeView, gameStateView, nameRevealView;
-    String count,countLimit="2";
+    String count,countLimit="15";
     int prevRound;
 
     private static final String CLIENT_ID = "a24f9f02a4fc4adb8138143d99bd8dc9";
@@ -215,7 +207,7 @@ public class MainActivity4 extends AppCompatActivity {
                 countDown(number,i);
                 togglePlayerName(i,0);
                 mSpotifyAppRemote.getPlayerApi().pause();
-                SystemClock.sleep(1000);
+                SystemClock.sleep(5000);
                 togglePlayerName(i,0);
             }
             incrementRound();

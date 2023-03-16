@@ -11,7 +11,9 @@ public class Song {
 
     public Song(String id, String name) {
         this.name = name;
-        this.uri = id.replace("spotify:track:","");
+        if (id != null) {
+            this.uri = id.replace("spotify:track:","");
+        }
         artists = new ArrayList<Artist>();
     }
 

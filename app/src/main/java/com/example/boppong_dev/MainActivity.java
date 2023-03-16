@@ -62,6 +62,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        DatabaseHelper playerDb = new DatabaseHelper(MainActivity.this);
+        playerDb.wipe();
 
         playerCount = findViewById(R.id.playerCountView);
         plus = findViewById(R.id.increaseGroupView);
@@ -143,12 +145,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Bitmap icon = BitmapFactory.decodeResource(MainActivity.this.getResources(),
                             playerProfilesDefault[i]);
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    icon.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                    icon.compress(Bitmap.CompressFormat.PNG, 100, baos);
                     byte[] b = baos.toByteArray();
                     String encodedImageString = Base64.encodeToString(b, Base64.DEFAULT);
 
                     byte[] bytarray = Base64.decode(encodedImageString, Base64.DEFAULT);
-                    playerDb.addPlayer(i,bytarray,"null","null","null");
+                    playerDb.addPlayer(i,bytarray,null,null,null);
                 }
 
                 builder.setScopes(new String[]{"streaming"});

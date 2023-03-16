@@ -2,9 +2,12 @@ package com.example.boppong_dev;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.Editable;
@@ -12,6 +15,7 @@ import android.text.TextWatcher;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -26,7 +30,9 @@ import com.example.boppong_dev.Connectors.SongService;
 import com.example.boppong_dev.Model.Player;
 import com.example.boppong_dev.Model.Song;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,11 +53,14 @@ public class Activity3 extends AppCompatActivity implements TextWatcher, Adapter
     Song chosenSong;
     ImageView imageViewPhoto;
     private static final int img_id = 123;
+    InputMethodManager inputManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_3);
+
+        myDb = new DatabaseHelper(Activity3.this);
 
         chosenSong = new Song("","");
 
@@ -65,7 +74,15 @@ public class Activity3 extends AppCompatActivity implements TextWatcher, Adapter
 
         playerName.setText(inPlayerName);
         //setting the byte[] as bitmap image, didnt ask me to convert, should I ? test this
-        playerImage.setImageBitmap(getIntent().getParcelableExtra("image"));
+        Cursor cursor = myDb.getProfileImage(Integer.toString(playerId));
+        if (cursor.getCount()==0){
+            Toast.makeText(Activity3.this,"no data", Toast.LENGTH_SHORT).show();
+        }
+        else{
+            while(cursor.moveToNext()){
+                playerImage.setImageBitmap(Bytes2Bitmap(cursor.getBlob(0)));
+            }
+        }
         editPlayerName.setText(getIntent().getStringExtra("name"));
 
         songService = new SongService(getApplicationContext());
@@ -80,8 +97,6 @@ public class Activity3 extends AppCompatActivity implements TextWatcher, Adapter
         songSub.setThreshold(3);
         songSub.setOnItemClickListener(this);
         getTracks();
-
-        myDb = new DatabaseHelper(Activity3.this);
     }
 
     @Override
@@ -118,19 +133,18 @@ public class Activity3 extends AppCompatActivity implements TextWatcher, Adapter
     }
 
     public void onSaveChanges(View view){
+        String writePlayerName = playerName.getText().toString().trim();
         if (chosenSong.getName().equals(songSub.getText().toString())){
             Intent intent = new Intent(this,Activity2.class);
-
-            String writePlayerName = playerName.getText().toString().trim();
             if (editPlayerName.getText()!=null){
                 writePlayerName = editPlayerName.getText().toString().trim();
             }
 
             //converting drawable into bitmap and then into byte[] to store in sql
 
-            Bitmap icon = BitmapFactory.decodeResource(Activity3.this.getResources(), playerImage.getId());
+            Bitmap icon = ((BitmapDrawable)playerImage.getDrawable()).getBitmap();
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            icon.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            icon.compress(Bitmap.CompressFormat.PNG, 100, baos);
             byte[] b = baos.toByteArray();
             String encodedImageString = Base64.encodeToString(b, Base64.DEFAULT);
 
@@ -161,5 +175,16 @@ public class Activity3 extends AppCompatActivity implements TextWatcher, Adapter
         playerImage.setImageBitmap(photo);
     }
 
-
+    public final static Bitmap Bytes2Bitmap(byte[] b) {
+        if (b == null) {
+            return null;
+        }
+        if (b.length != 0) {
+            InputStream is = new ByteArrayInputStream(b);
+            Bitmap bmp = BitmapFactory.decodeStream(is);
+            return bmp;
+        } else {
+            return null;
+        }
+    }
 }

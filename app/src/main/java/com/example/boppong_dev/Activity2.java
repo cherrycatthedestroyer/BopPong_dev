@@ -86,6 +86,7 @@ public class Activity2 extends AppCompatActivity implements RecyclerViewInterfac
     }
 
     private void reset(){
+        myDb.wipe();
         editor = msharedPreferences.edit();
         editor.putInt("currentRound", 0);
         editor.commit();
@@ -112,7 +113,7 @@ public class Activity2 extends AppCompatActivity implements RecyclerViewInterfac
 
         Bitmap icon = players.get(position).getImage();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        icon.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        icon.compress(Bitmap.CompressFormat.PNG, 100, baos);
         byte[] b = baos.toByteArray();
         String encodedImageString = Base64.encodeToString(b, Base64.DEFAULT);
 

@@ -14,27 +14,40 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent">
 
-            <ImageView
-                android:id="@+id/playerImageView"
-                android:layout_width="137dp"
-                android:layout_height="137dp"
-                tools:srcCompat="@drawable/testprofile1" />
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:padding="0dp"
+                app:cardCornerRadius="255dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:id="@+id/playerImageView"
+                    android:layout_width="137dp"
+                    android:layout_height="137dp"
+                    android:adjustViewBounds="true"
+                    android:paddingTop="0dp"
+                    tools:srcCompat="@drawable/testprofile1" />
+            </androidx.cardview.widget.CardView>
 
             <TextView
                 android:id="@+id/playerNameView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/userNameDefault"
-                app:layout_constraintStart_toEndOf="@+id/playerImageView" />
+                app:layout_constraintStart_toEndOf="@+id/cardView" />
 
             <TextView
                 android:id="@+id/playerStatusView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/userSongUnsubmitted"
-                app:layout_constraintStart_toEndOf="@+id/playerImageView"
+                app:layout_constraintStart_toEndOf="@+id/cardView"
                 app:layout_constraintTop_toBottomOf="@+id/playerNameView" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
