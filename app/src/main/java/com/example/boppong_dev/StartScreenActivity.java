@@ -31,11 +31,9 @@ import java.io.ByteArrayOutputStream;
 public class StartScreenActivity extends AppCompatActivity implements View.OnClickListener{
     private static final String CLIENT_ID = "a24f9f02a4fc4adb8138143d99bd8dc9";
     private static final String REDIRECT_URI = "https://www.youtube.com/";
-    private SpotifyAppRemote mSpotifyAppRemote;
 
     protected RequestQueue mRequestQueue;
     protected StringRequest mStringRequest;
-    protected String url = "https://api.spotify.com/v1/search?q=hair%20down&type=track&limit=3&offset=5";
 
     private static final int REQUEST_CODE = 1337;
     private SharedPreferences.Editor editor;
