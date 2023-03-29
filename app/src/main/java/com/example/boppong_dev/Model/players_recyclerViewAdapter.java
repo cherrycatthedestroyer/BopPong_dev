@@ -1,8 +1,6 @@
 package com.example.boppong_dev.Model;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.drawable.BitmapDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,7 +55,7 @@ public class players_recyclerViewAdapter extends RecyclerView.Adapter<players_re
         ImageView playerPicture;
         public MyViewHolder(@NonNull View itemView,RecyclerViewInterface recyclerViewInterface) {
             super(itemView);
-            playerPicture = itemView.findViewById(R.id.playerImageView);
+            playerPicture = itemView.findViewById(R.id.playerImageRevealView);
             playerName = itemView.findViewById(R.id.playerNameView);
             playerStatus = itemView.findViewById(R.id.playerStatusView);
 

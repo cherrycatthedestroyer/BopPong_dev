@@ -13,6 +13,9 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Base64;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,16 +34,19 @@ import java.util.ArrayList;
 public class RoundActivity extends AppCompatActivity {
     DatabaseHelper myDb;
     ArrayList<Player> players = new ArrayList<>();
-
-    TextView clockTimeView, gameStateView, nameRevealView;
+    TextView clockTimeView, nameRevealView;
     String count,countLimit="15";
     int prevRound;
-
     private static final String CLIENT_ID = "a24f9f02a4fc4adb8138143d99bd8dc9";
     private static final String REDIRECT_URI = "https://www.youtube.com/";
     private SpotifyAppRemote mSpotifyAppRemote;
     private SharedPreferences.Editor editor;
     private SharedPreferences msharedPreferences;
+    private ProgressBar progressBar;
+    private TextView progressText;
+    int i = 0;
+
+    private ImageView playerReveal,outerCard;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,12 +62,18 @@ public class RoundActivity extends AppCompatActivity {
         nameRevealView = findViewById(R.id.nameRevealView);
 
         clockTimeView.setText(count);
-        gameStateView = findViewById(R.id.gameStateView);
-        gameStateView.setText("guessing");
 
         //round number loaded from shared preferences
         msharedPreferences = getSharedPreferences("GAME",MODE_PRIVATE);
         prevRound = msharedPreferences.getInt("currentRound",0);
+
+        progressBar = findViewById(R.id.progress_bar);
+        progressText = findViewById(R.id.progress_text);
+
+        playerReveal = findViewById(R.id.playerImageRevealView);
+        playerReveal.setVisibility(View.INVISIBLE);
+        outerCard = findViewById(R.id.outerCard);
+        outerCard.setVisibility(View.INVISIBLE);
 
         //This listener is responsible for changing the view data depending on what game state
         //It is being used as an event listener where view data is updated depending on the state its in
@@ -84,7 +96,7 @@ public class RoundActivity extends AppCompatActivity {
                                       int before, int count) {
                 if(s.toString().equals("-1")){
                     resetCount();
-                    gameStateView.setText(checkState());
+                    checkState();
                 }
             }
         });
@@ -107,11 +119,13 @@ public class RoundActivity extends AppCompatActivity {
                 countDown(number,i);
                 //GUESSING state player hidden
                 togglePlayerName(i,0);
+                togglePicture(i,1);
                 //pauses spotify song at the end of GUESSING state
                 mSpotifyAppRemote.getPlayerApi().pause();
                 //REVEAL state for 5 seconds
                 SystemClock.sleep(5000);
                 togglePlayerName(i,0);
+                togglePicture(i,0);
             }
             for (int i=0;i<number;i++){
                 Player currPlayer= players.get(i);
@@ -121,7 +135,6 @@ public class RoundActivity extends AppCompatActivity {
                 icon.compress(Bitmap.CompressFormat.PNG, 100, baos);
                 byte[] b = baos.toByteArray();
                 String encodedImageString = Base64.encodeToString(b, Base64.DEFAULT);
-
                 byte[] bytarray = Base64.decode(encodedImageString, Base64.DEFAULT);
                 myDb.updateData(Integer.toString(currPlayer.getId()),currPlayer.getName(),null,null,null,bytarray);
             }
@@ -147,7 +160,6 @@ public class RoundActivity extends AppCompatActivity {
                     public void onConnected(SpotifyAppRemote spotifyAppRemote) {
                         mSpotifyAppRemote = spotifyAppRemote;
                         Log.d("RoundActivity", "Connected");
-
                         // Now you can start interacting with App Remote
                         connected();
 
@@ -155,7 +167,6 @@ public class RoundActivity extends AppCompatActivity {
 
                     public void onFailure(Throwable throwable) {
                         Log.e("RoundActivity", throwable.getMessage(), throwable);
-
                         // didn't connect
                     }
                 });
@@ -198,12 +209,15 @@ public class RoundActivity extends AppCompatActivity {
         int i =Integer.parseInt(countLimit);
         while (i>-2){
             count = String.valueOf(i);
+            int percentage = (int) ((Float.parseFloat(countLimit)-i-1)/Float.parseFloat(countLimit)*100);
             this.runOnUiThread(new Runnable() {
                 //view is updated
                 @Override
                 public void run() {
                     clockTimeView.setText(count);
-                    gameStateView.setText(checkState());
+                    checkState();
+                    progressText.setText("" + (Integer.parseInt(count)+(int)1));
+                    progressBar.setProgress(percentage);
                 }
             });
             SystemClock.sleep(1000);
@@ -235,6 +249,23 @@ public class RoundActivity extends AppCompatActivity {
                 editor = msharedPreferences.edit();
                 editor.putInt("currentRound", prevRound+1);
                 editor.commit();
+            }
+        });
+    }
+
+    protected void togglePicture(int playerPos, int toggle){
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (toggle==0){
+                    playerReveal.setVisibility(View.INVISIBLE);
+                    outerCard.setVisibility(View.INVISIBLE);
+                }
+                else{
+                    playerReveal.setImageBitmap(players.get(playerPos).getImage());
+                    playerReveal.setVisibility(View.VISIBLE);
+                    outerCard.setVisibility(View.VISIBLE);
+                }
             }
         });
     }

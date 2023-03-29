@@ -27,7 +27,7 @@
                 app:layout_constraintTop_toTopOf="parent">
 
                 <ImageView
-                    android:id="@+id/playerImageView"
+                    android:id="@+id/playerImageRevealView"
                     android:layout_width="137dp"
                     android:layout_height="137dp"
                     android:adjustViewBounds="true"
