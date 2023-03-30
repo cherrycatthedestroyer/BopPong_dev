@@ -2,6 +2,8 @@ package com.example.boppong_dev.Model;
 
 import android.graphics.Bitmap;
 
+import java.util.ArrayList;
+
 public class Player {
     int id;
     Bitmap image;
@@ -31,7 +33,15 @@ public class Player {
         return songSubmission;
     }
 
-    public void setSongSubmission(Song newSub){
-        songSubmission = newSub;
+    public void setSongSubmission(Song songSubmission) {
+        this.songSubmission = songSubmission;
+    }
+
+    public void setImage(Bitmap image) {
+        this.image = image;
+    }
+
+    public void setName(String in_name){
+        this.name = in_name;
     }
 }

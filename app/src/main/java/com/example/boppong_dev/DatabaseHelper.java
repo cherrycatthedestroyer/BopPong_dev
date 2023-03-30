@@ -11,6 +11,11 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.core.database.sqlite.SQLiteDatabaseKt;
 
+import com.example.boppong_dev.Connectors.Serializer;
+import com.example.boppong_dev.Model.Song;
+
+import java.util.ArrayList;
+
 public class DatabaseHelper extends SQLiteOpenHelper {
     private Context context;
     private static final String DATABASE_NAME= "bpDevData.db";
@@ -38,7 +43,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + COLUMN_IMAGE + " BLOB, "
                 + COLUMN_SONG_ID + " STRING, "
                 + COLUMN_SONG_NAME + " STRING, "
-                + COLUMN_SONG_ARTIST + " STRING);";
+                + COLUMN_SONG_ARTIST+ " STRING);";
         db.execSQL(query);
     }
 
@@ -49,7 +54,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     //adds player to database with all its information
-    void addPlayer(int playerIndex, byte[] playerImage, String playerSongId, String playerSong, String playerSongArtist){
+    void addPlayer(int playerIndex, byte[] playerImage, String playerSongId, String playerSong, String playerSongArtist) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues cv = new ContentValues();
 
@@ -114,6 +119,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     //retrieves player image based on id
     Cursor getProfileImage(String row_id){
         String query = "SELECT image FROM " + TABLE_NAME + " WHERE id = ? LIMIT 1";
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = null;
+        if (db != null){
+            cursor= db.rawQuery(query,new String[]{row_id});
+        }
+        return cursor;
+    }
+
+    Cursor getPlayer(String row_id){
+        String query = "SELECT * FROM " + TABLE_NAME + " WHERE id = ? LIMIT 1";
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = null;
         if (db != null){

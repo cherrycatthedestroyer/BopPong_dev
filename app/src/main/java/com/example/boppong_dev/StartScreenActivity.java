@@ -14,7 +14,9 @@ import android.widget.Button;
 import android.widget.TextView;
 
 
+import com.example.boppong_dev.Connectors.Serializer;
 import com.example.boppong_dev.Connectors.UserService;
+import com.example.boppong_dev.Model.Song;
 import com.example.boppong_dev.Model.User;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
 
@@ -26,6 +28,7 @@ import com.spotify.sdk.android.auth.AuthorizationRequest;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 
 
 public class StartScreenActivity extends AppCompatActivity implements View.OnClickListener{
@@ -149,7 +152,11 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
                     byte[] bytarray = Base64.decode(encodedImageString, Base64.DEFAULT);
 
                     //adding player object to database
-                    playerDb.addPlayer(i,bytarray,null,null,null);
+                    try {
+                        playerDb.addPlayer(i,bytarray,null,null,null);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }
 
                 //initiates the spotify connection process that calls the functions above

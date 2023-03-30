@@ -21,7 +21,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.boppong_dev.Connectors.DropDownAdapter;
+import com.example.boppong_dev.Connectors.Serializer;
 import com.example.boppong_dev.Connectors.SongService;
+import com.example.boppong_dev.Model.Player;
 import com.example.boppong_dev.Model.Song;
 
 import java.io.ByteArrayInputStream;
@@ -32,13 +34,14 @@ import java.util.ArrayList;
 public class UserEditActivity extends AppCompatActivity implements TextWatcher, AdapterView.OnItemClickListener {
     DatabaseHelper myDb;
     private SongService songService;
+    Player currentPlayer;
     AutoCompleteTextView songSub;
     ArrayList<Song> searchResults = new ArrayList<>();
     DropDownAdapter<String> adapter;
     TextView playerName;
     EditText editPlayerName;
     ImageView playerImage;
-    int playerId;
+    int playerId, round;
     Song chosenSong;
     ImageView imageViewPhoto;
     private static final int img_id = 123;
@@ -55,33 +58,27 @@ public class UserEditActivity extends AppCompatActivity implements TextWatcher, 
         chosenSong = new Song("","");
 
         //loading data from intent
-        String inPlayerName = getIntent().getStringExtra("name");
+        round = getIntent().getIntExtra("round",0);
         playerId = getIntent().getIntExtra("id",0);
+
+        try {
+            currentPlayer = fetchPlayer(playerId);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         playerName = findViewById(R.id.playerNameTextView);
         playerImage = findViewById(R.id.selectedPlayerImageView);
         editPlayerName = findViewById(R.id.editNameTextView);
         imageViewPhoto = findViewById(R.id.selectedPlayerImageView);
 
-        playerName.setText(inPlayerName);
-        //setting the byte[] as bitmap image from the sql database by searching by id
-        Cursor cursor = myDb.getProfileImage(Integer.toString(playerId));
-        if (cursor.getCount()==0){
-            Toast.makeText(UserEditActivity.this,"no data", Toast.LENGTH_SHORT).show();
-        }
-        else{
-            while(cursor.moveToNext()){
-                playerImage.setImageBitmap(Bytes2Bitmap(cursor.getBlob(0)));
-            }
-        }
-        editPlayerName.setText(getIntent().getStringExtra("name"));
+        playerName.setText(currentPlayer.getName());
+        playerImage.setImageBitmap(currentPlayer.getImage());
 
         songService = new SongService(getApplicationContext());
 
         songSub = findViewById(R.id.songSubEntry);
         songSub.addTextChangedListener(this);
-
-        songSub.setText(getIntent().getStringExtra("song"));
 
         //custom dropdown box that requires custom view to inflate results with
         adapter = new DropDownAdapter<String>(this, android.R.layout.simple_list_item_1, searchResults);
@@ -133,26 +130,24 @@ public class UserEditActivity extends AppCompatActivity implements TextWatcher, 
     }
 
     //updating edited player data to database then sends them back to the lobby screen
-    public void onSaveChanges(View view){
-        String writePlayerName = playerName.getText().toString().trim();
+    public void onSaveChanges(View view) throws Exception {
+        String writePlayerName = currentPlayer.getName();
+        System.out.println("swaggy");
         //only triggers if a song is selected
         if (chosenSong.getName().equals(songSub.getText().toString())){
             Intent intent = new Intent(this, LobbyActivity.class);
             if (editPlayerName.getText()!=null){
-                writePlayerName = editPlayerName.getText().toString().trim();
+                currentPlayer.setName(editPlayerName.getText().toString().trim());
             }
 
-            //converting drawable into bitmap and then into byte[] to store in sql SOURCED
+            currentPlayer.setSongSubmission(chosenSong);
 
-            Bitmap icon = ((BitmapDrawable)playerImage.getDrawable()).getBitmap();
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            icon.compress(Bitmap.CompressFormat.PNG, 100, baos);
-            byte[] b = baos.toByteArray();
-            String encodedImageString = Base64.encodeToString(b, Base64.DEFAULT);
-
-            byte[] bytarray = Base64.decode(encodedImageString, Base64.DEFAULT);
-
-            myDb.updateData(Integer.toString(playerId),writePlayerName,chosenSong.getName(),chosenSong.getId(),chosenSong.getArtist(),bytarray);
+            myDb.updateData(Integer.toString(currentPlayer.getId()),
+                    currentPlayer.getName(),
+                    chosenSong.getName(),
+                    chosenSong.getId(),
+                    chosenSong.getArtist(),
+                    Serializer.serializeBitmap(currentPlayer.getImage()));
             startActivity(intent);
         }
         else{
@@ -179,19 +174,23 @@ public class UserEditActivity extends AppCompatActivity implements TextWatcher, 
         Bitmap photo = (Bitmap) data.getExtras().get("data");
         imageViewPhoto.setImageBitmap(photo);
         playerImage.setImageBitmap(photo);
+        currentPlayer.setImage(photo);
     }
 
-    //SOURCED function to convert bytes to bitmap
-    public final static Bitmap Bytes2Bitmap(byte[] b) {
-        if (b == null) {
-            return null;
+    protected Player fetchPlayer(int in_id) throws Exception {
+        Cursor cursor = myDb.getPlayer(Integer.toString(in_id));
+        Player temp_player= new Player(-1,null,null,null);
+        if (cursor.getCount()==0){
+            Toast.makeText(UserEditActivity.this,"no data", Toast.LENGTH_SHORT).show();
         }
-        if (b.length != 0) {
-            InputStream is = new ByteArrayInputStream(b);
-            Bitmap bmp = BitmapFactory.decodeStream(is);
-            return bmp;
-        } else {
-            return null;
+        else{
+            while(cursor.moveToNext()){
+                temp_player = new Player(
+                        Integer.parseInt(cursor.getString(0)),cursor.getString(1)
+                        ,new Song(cursor.getString(3),cursor.getString(4)),
+                        Serializer.deserializeBitmap(cursor.getBlob(2)));
+            }
         }
+        return temp_player;
     }
 }

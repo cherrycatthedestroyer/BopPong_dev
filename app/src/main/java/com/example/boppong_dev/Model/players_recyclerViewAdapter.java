@@ -55,7 +55,7 @@ public class players_recyclerViewAdapter extends RecyclerView.Adapter<players_re
         ImageView playerPicture;
         public MyViewHolder(@NonNull View itemView,RecyclerViewInterface recyclerViewInterface) {
             super(itemView);
-            playerPicture = itemView.findViewById(R.id.playerImageRevealView);
+            playerPicture = itemView.findViewById(R.id.playerImageView);
             playerName = itemView.findViewById(R.id.playerNameView);
             playerStatus = itemView.findViewById(R.id.playerStatusView);
 

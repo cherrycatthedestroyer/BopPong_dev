@@ -19,6 +19,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.boppong_dev.Connectors.Serializer;
 import com.example.boppong_dev.Model.Player;
 import com.example.boppong_dev.Model.Song;
 import com.spotify.android.appremote.api.ConnectionParams;
@@ -55,7 +56,11 @@ public class RoundActivity extends AppCompatActivity {
 
         //players loaded in from sql database
         myDb = new DatabaseHelper(RoundActivity.this);
-        fetchPlayers();
+        try {
+            fetchPlayers();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         clockTimeView = findViewById(R.id.clockTimeView);
         count = countLimit;
@@ -127,6 +132,7 @@ public class RoundActivity extends AppCompatActivity {
                 togglePlayerName(i,0);
                 togglePicture(i,0);
             }
+            /*
             for (int i=0;i<number;i++){
                 Player currPlayer= players.get(i);
                 //converting drawable into bitmap and then into byte[] to store in sql
@@ -138,6 +144,7 @@ public class RoundActivity extends AppCompatActivity {
                 byte[] bytarray = Base64.decode(encodedImageString, Base64.DEFAULT);
                 myDb.updateData(Integer.toString(currPlayer.getId()),currPlayer.getName(),null,null,null,bytarray);
             }
+            */
             incrementRound();
             backToLobby();
         }
@@ -294,13 +301,14 @@ public class RoundActivity extends AppCompatActivity {
     }
 
     //loads in players from sql database
-    protected void fetchPlayers(){
+    protected void fetchPlayers() throws Exception {
         Cursor cursor = myDb.readAllData();
         if (cursor.getCount()==0){
             Toast.makeText(RoundActivity.this,"no data", Toast.LENGTH_SHORT).show();
         }
         else{
             while(cursor.moveToNext()){
+                //the image is converted from byte[] to bitmap using bytes2bitmap()
                 players.add(new Player(Integer.parseInt(cursor.getString(0)),cursor.getString(1)
                         ,new Song(cursor.getString(3),cursor.getString(4)),Bytes2Bitmap(cursor.getBlob(2))));
             }

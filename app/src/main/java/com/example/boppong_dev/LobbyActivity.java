@@ -19,6 +19,7 @@ import android.util.Base64;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.boppong_dev.Connectors.Serializer;
 import com.example.boppong_dev.Model.Player;
 import com.example.boppong_dev.Model.Song;
 import com.example.boppong_dev.Model.players_recyclerViewAdapter;
@@ -120,6 +121,8 @@ public class LobbyActivity extends AppCompatActivity implements RecyclerViewInte
         intent.putExtra("image", bytarray);
         intent.putExtra("song", players.get(position).getSongSubmission().getName());
 
+        intent.putExtra("round",currentRound);
+
         startActivity(intent);
     }
 
@@ -128,19 +131,13 @@ public class LobbyActivity extends AppCompatActivity implements RecyclerViewInte
     protected void onResume() {
         super.onResume();
         //updating users via sql database
-        fetchPlayers();
+        try {
+            fetchPlayers();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         //gyroscope activated
         sensorManager.registerListener(this, gyro, SensorManager.SENSOR_DELAY_NORMAL);
-        //we dont need this as fetchplayers updates the users from sql
-        //old method of passing back edit user data from user edit activity
-        if (getIntent().hasExtra("songid")){
-            String songUpdate = getIntent().getStringExtra("song");
-            String songUpdateId = getIntent().getStringExtra("songid");
-            int userPos = getIntent().getIntExtra("id",0);
-            if (songUpdate.length()>0){
-                players.get(userPos).setSongSubmission(new Song(songUpdateId,songUpdate));
-            }
-        }
     }
 
     //when phone is placed on table, players are checked to see if they have all submitted a song and if so
@@ -172,7 +169,7 @@ public class LobbyActivity extends AppCompatActivity implements RecyclerViewInte
     }
 
     //updates player array using player data from sql database
-    protected void fetchPlayers(){
+    protected void fetchPlayers() throws Exception {
         Cursor cursor = myDb.readAllData();
         if (cursor.getCount()==0){
             Toast.makeText(LobbyActivity.this,"no data", Toast.LENGTH_SHORT).show();

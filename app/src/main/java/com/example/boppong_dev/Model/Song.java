@@ -4,7 +4,7 @@ import java.lang.reflect.Array;
 import java.sql.Struct;
 import java.util.ArrayList;
 
-public class Song {
+public class Song implements java.io.Serializable{
     private String uri;
     private String name;
     private ArrayList<Artist> artists;
@@ -39,5 +39,29 @@ public class Song {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "Song{" +
+                "name='" + name + '\'' +
+                ", uri='" + uri + '\'' +
+                convertArraytoString() +
+                '}';
+    }
+
+    public String convertArraytoString(){
+        String start = ", artists=[";
+
+        start += artists.get(0).toString();
+        if (artists.size()>1){
+            for (int i=1;i<artists.size();i++){
+                start += ", "+artists.get(i).toString();
+            }
+        }
+
+        start+="]";
+
+        return start;
     }
 }
