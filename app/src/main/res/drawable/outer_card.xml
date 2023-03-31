@@ -4,6 +4,7 @@
     android:innerRadiusRatio="2.5"
     android:shape="ring"
     android:thickness="400dp"
+    android:background="@drawable/start_screen"
     android:useLevel="false">
     <solid android:color="@color/grey" />
 </shape>
