@@ -3,16 +3,23 @@ package com.example.boppong_dev;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.ActivityOptions;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 
@@ -46,11 +53,15 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
             new AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI);
 
     protected Button start;
+    protected ImageButton settingsButton;
 
     ImageView minus,plus;
     protected TextView playerCount;
     int[] playerProfilesDefault = {R.drawable.testprofile1,R.drawable.testprofile2
             ,R.drawable.testprofile3,R.drawable.testprofile4,R.drawable.testprofile5,R.drawable.testprofile6};
+
+    Dialog settings;
+    int roundLimit, roundLength, tempRoundLimit, tempRoundLength;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +72,13 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
         DatabaseHelper playerDb = new DatabaseHelper(StartScreenActivity.this);
         playerDb.wipe();
         resetRound();
+
+        settings = new Dialog(this);
+        settingsButton = findViewById(R.id.settingsButton);
+
+        msharedPreferences = getSharedPreferences("GAME",MODE_PRIVATE);
+        roundLimit = msharedPreferences.getInt("roundLimit",3);
+        roundLength = msharedPreferences.getInt("roundLength",15);
 
         //setting up view objects
         playerCount = findViewById(R.id.playerCountView);
@@ -129,15 +147,84 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
         ArrayList<String> prompts = new ArrayList<String>(Arrays.asList(getResources().getStringArray(R.array.prompts)));;
         Collections.shuffle(prompts);
         newIntent.putStringArrayListExtra("prompts",prompts);
+        editor = getSharedPreferences("GAME", 0).edit();
+        editor.putInt("roundLimit", roundLimit);
+        editor.putInt("roundLength", roundLength);
+        editor.commit();
         Bundle b = ActivityOptions.makeSceneTransitionAnimation(this).toBundle();
         startActivity(newIntent,b);
     }
 
     //selecting how many players will be in the game and generating their objects and adding that to database
+    //and opening up the settings dialog and saving those value to shared prefs
     @Override
     public void onClick(View v) {
         int value = Integer.parseInt(playerCount.getText().toString());
-        if (v.getId()==plus.getId()&&value<6){
+        if (v.getId()==settingsButton.getId()){
+            tempRoundLimit = roundLimit == 3 ? 0 : (roundLimit == 15 ? 1 : 2);
+            tempRoundLength = roundLength == 15 ? 0 : (roundLength == 30 ? 1 : 2);
+
+            settings.setContentView(R.layout.settings);
+            Button yes = settings.findViewById(R.id.yes);
+            Button no = settings.findViewById(R.id.no);
+            RadioGroup rounds = settings.findViewById(R.id.radioGroupRounds);
+            RadioGroup length = settings.findViewById(R.id.radioGroupLength);
+
+            int [] posRound = {settings.findViewById(R.id.button3).getId(),settings.findViewById(R.id.button6).getId(),
+                    settings.findViewById(R.id.button12).getId()};
+            int [] posLength = {settings.findViewById(R.id.button15).getId(),settings.findViewById(R.id.button30).getId(),
+                    settings.findViewById(R.id.button45).getId()};
+
+            rounds.check(posRound[tempRoundLimit]);
+            length.check(posLength[tempRoundLength]);
+            rounds.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(RadioGroup group, int checkedId) {
+                    if (checkedId == posRound[0]){
+                        tempRoundLimit = 3;
+                    }
+                    else if (checkedId == posRound[1]){
+                        tempRoundLimit = 6;
+                    }
+                    else if (checkedId == posRound[2]){
+                        tempRoundLimit = 12;
+                    }
+                }
+            });
+            length.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(RadioGroup group, int checkedId) {
+                    if (checkedId == posLength[0]){
+                        tempRoundLength = 15;
+                    }
+                    else if (checkedId == posLength[1]){
+                        tempRoundLength= 30;
+                    }
+                    else if (checkedId == posLength[2]){
+                        tempRoundLength = 45;
+                    }
+                    System.out.println(tempRoundLength);
+                }
+            });
+            yes.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    roundLimit = tempRoundLimit;
+                    roundLength = tempRoundLength;
+                    settings.dismiss();
+                }
+            });
+            no.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    settings.dismiss();
+                }
+            });
+            settings.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            settings.show();
+        }
+
+        else if (v.getId()==plus.getId()&&value<6){
             value++;
         }
         else if (value>0){

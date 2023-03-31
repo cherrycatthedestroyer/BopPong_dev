@@ -41,7 +41,7 @@ public class RoundActivity extends AppCompatActivity {
     DatabaseHelper myDb;
     ArrayList<Player> players = new ArrayList<>();
     TextView clockTimeView, nameRevealView;
-    String count,countLimit="15";
+    String count,countLimit;
     int prevRound;
     private static final String CLIENT_ID = "a24f9f02a4fc4adb8138143d99bd8dc9";
     private static final String REDIRECT_URI = "https://www.youtube.com/";
@@ -71,15 +71,16 @@ public class RoundActivity extends AppCompatActivity {
             throw new RuntimeException(e);
         }
 
+        //round number loaded from shared preferences
+        msharedPreferences = getSharedPreferences("GAME",MODE_PRIVATE);
+        prevRound = msharedPreferences.getInt("currentRound",0);
+        countLimit = Integer.toString(msharedPreferences.getInt("roundLength",15));
+
         clockTimeView = findViewById(R.id.clockTimeView);
         count = countLimit;
         nameRevealView = findViewById(R.id.nameRevealView);
 
         clockTimeView.setText(count);
-
-        //round number loaded from shared preferences
-        msharedPreferences = getSharedPreferences("GAME",MODE_PRIVATE);
-        prevRound = msharedPreferences.getInt("currentRound",0);
 
         progressBar = findViewById(R.id.progress_bar);
         progressText = findViewById(R.id.progress_text);
@@ -239,7 +240,7 @@ public class RoundActivity extends AppCompatActivity {
                 public void run() {
                     clockTimeView.setText(count);
                     checkState();
-                    if (Integer.parseInt(count)+(int)1==16){
+                    if (Integer.parseInt(count)+(int)1==Integer.parseInt(countLimit)+1){
                         progressText.setText("...");
                     }
                     else{
@@ -362,8 +363,8 @@ public class RoundActivity extends AppCompatActivity {
     }
     public void onBackPressed() {
         popup.setContentView(R.layout.pop_up);
-        Button yes = popup.findViewById(R.id.yes);
-        Button no = popup.findViewById(R.id.no);
+        Button yes = popup.findViewById(R.id.no);
+        Button no = popup.findViewById(R.id.yes);
         yes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

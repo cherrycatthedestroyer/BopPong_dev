@@ -2,6 +2,7 @@ package com.example.boppong_dev;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -48,12 +49,12 @@ public class UserEditActivity extends AppCompatActivity implements TextWatcher, 
     ImageView playerImage;
     int playerId, round;
     Song chosenSong;
-    ImageView imageViewPhoto;
     private static final int img_id = 123;
     private ArrayList<String> prompts;
     private InputMethodManager imm;
     private boolean isKeyboardEnabled = true;
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,7 +80,6 @@ public class UserEditActivity extends AppCompatActivity implements TextWatcher, 
         playerName = findViewById(R.id.playerNameTextView);
         playerImage = findViewById(R.id.selectedPlayerImageView);
         editPlayerName = findViewById(R.id.editNameTextView);
-        imageViewPhoto = findViewById(R.id.selectedPlayerImageView);
 
         playerName.setText(currentPlayer.getName());
         editPlayerName.setText(currentPlayer.getName());
@@ -95,6 +95,7 @@ public class UserEditActivity extends AppCompatActivity implements TextWatcher, 
         songSub = findViewById(R.id.songSubEntry);
         songSub.addTextChangedListener(this);
         imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+
         songSub.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -215,7 +216,6 @@ public class UserEditActivity extends AppCompatActivity implements TextWatcher, 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Bitmap photo = (Bitmap) data.getExtras().get("data");
-        imageViewPhoto.setImageBitmap(photo);
         playerImage.setImageBitmap(photo);
         currentPlayer.setImage(photo);
     }

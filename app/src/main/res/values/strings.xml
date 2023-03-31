@@ -17,6 +17,8 @@
     <string name="popup2">discard ?</string>
     <string name="quit">yes</string>
     <string name="cont">no</string>
+    <string name="settings">settings</string>
+
     <string-array name="prompts">
         <item>a song I cry to ...</item>
         <item>a song that\'s deep ...</item>

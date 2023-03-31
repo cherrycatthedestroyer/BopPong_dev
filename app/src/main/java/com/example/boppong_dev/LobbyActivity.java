@@ -4,7 +4,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.ActivityOptions;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -19,20 +18,17 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.boppong_dev.Connectors.Serializer;
 import com.example.boppong_dev.Model.Player;
 import com.example.boppong_dev.Model.Song;
 import com.example.boppong_dev.Model.players_recyclerViewAdapter;
 import com.example.boppong_dev.Model.RecyclerViewInterface;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 
@@ -44,7 +40,7 @@ public class LobbyActivity extends AppCompatActivity implements RecyclerViewInte
     Sensor gyro;
     private SharedPreferences msharedPreferences;
     private SharedPreferences.Editor editor;
-    int currentRound, roundLimit=3;
+    int currentRound, roundLimit;
     TextView roundView;
     DatabaseHelper myDb;
     ArrayList<String> prompts;
@@ -60,6 +56,7 @@ public class LobbyActivity extends AppCompatActivity implements RecyclerViewInte
         //opening internal storage to get current round and set it
         msharedPreferences = getSharedPreferences("GAME",MODE_PRIVATE);
         currentRound = msharedPreferences.getInt("currentRound",0);
+        roundLimit = msharedPreferences.getInt("roundLimit",3);
         roundView = findViewById(R.id.roundView);
         roundView.setText("Round "+(int)(currentRound+(int)1));
 
@@ -202,8 +199,8 @@ public class LobbyActivity extends AppCompatActivity implements RecyclerViewInte
     @Override
     public void onBackPressed() {
         popup.setContentView(R.layout.pop_up);
-        Button yes = popup.findViewById(R.id.yes);
-        Button no = popup.findViewById(R.id.no);
+        Button yes = popup.findViewById(R.id.no);
+        Button no = popup.findViewById(R.id.yes);
         yes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
