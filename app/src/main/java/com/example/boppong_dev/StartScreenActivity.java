@@ -76,9 +76,8 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
         settings = new Dialog(this);
         settingsButton = findViewById(R.id.settingsButton);
 
-        msharedPreferences = getSharedPreferences("GAME",MODE_PRIVATE);
-        roundLimit = msharedPreferences.getInt("roundLimit",3);
-        roundLength = msharedPreferences.getInt("roundLength",15);
+        setPrefs(3,15,0);
+        getPrefs();
 
         //setting up view objects
         playerCount = findViewById(R.id.playerCountView);
@@ -147,10 +146,7 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
         ArrayList<String> prompts = new ArrayList<String>(Arrays.asList(getResources().getStringArray(R.array.prompts)));;
         Collections.shuffle(prompts);
         newIntent.putStringArrayListExtra("prompts",prompts);
-        editor = getSharedPreferences("GAME", 0).edit();
-        editor.putInt("roundLimit", roundLimit);
-        editor.putInt("roundLength", roundLength);
-        editor.commit();
+        setPrefs(roundLimit,roundLength,0);
         Bundle b = ActivityOptions.makeSceneTransitionAnimation(this).toBundle();
         startActivity(newIntent,b);
     }
@@ -264,10 +260,33 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
         playerCount.setText(Integer.toString(value));
     }
 
+    protected void setPrefs(int limit, int length, int round){
+        SharedPreferences sharedPrefs = getSharedPreferences("GAME",MODE_PRIVATE);
+        SharedPreferences.Editor sharedEditor= sharedPrefs.edit();
+        sharedEditor.putInt("roundLimit", limit);
+        sharedEditor.putInt("roundLength", length);
+        sharedEditor.putInt("currentRound", round);
+        sharedEditor.commit();
+    }
+
+    protected void setPrefs(int limit, int length){
+        SharedPreferences sharedPrefs = getSharedPreferences("GAME",MODE_PRIVATE);
+        SharedPreferences.Editor sharedEditor= sharedPrefs.edit();
+        sharedEditor.putInt("roundLimit", limit);
+        sharedEditor.putInt("roundLength", length);
+        sharedEditor.commit();
+    }
+
+    protected void getPrefs(){
+        SharedPreferences sharedPrefs = getSharedPreferences("GAME",MODE_PRIVATE);
+        roundLimit = sharedPrefs.getInt("roundLimit",3);
+        roundLength = sharedPrefs.getInt("roundLength",15);
+    }
+
     protected void resetRound(){
-        msharedPreferences = getSharedPreferences("GAME",MODE_PRIVATE);
-        editor = msharedPreferences.edit();
-        editor.putInt("currentRound", 0);
-        editor.commit();
+        SharedPreferences sharedPrefs = getSharedPreferences("GAME",MODE_PRIVATE);
+        SharedPreferences.Editor sharedEditor = sharedPrefs.edit();
+        sharedEditor.putInt("currentRound", 0);
+        sharedEditor.commit();
     }
 }

@@ -24,6 +24,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.boppong_dev.Connectors.Serializer;
 import com.example.boppong_dev.Model.Player;
 import com.example.boppong_dev.Model.Song;
 import com.spotify.android.appremote.api.ConnectionParams;
@@ -40,17 +41,16 @@ import java.util.Collections;
 public class RoundActivity extends AppCompatActivity {
     DatabaseHelper myDb;
     ArrayList<Player> players = new ArrayList<>();
+    ArrayList<Player> playersUnshuffled = new ArrayList<>();
     TextView clockTimeView, nameRevealView;
-    String count,countLimit;
+    String count, countLimit;
     int prevRound;
     private static final String CLIENT_ID = "a24f9f02a4fc4adb8138143d99bd8dc9";
     private static final String REDIRECT_URI = "https://www.youtube.com/";
     private SpotifyAppRemote mSpotifyAppRemote;
     private SharedPreferences.Editor editor;
-    private SharedPreferences msharedPreferences;
     private ProgressBar progressBar;
     private TextView progressText;
-    int i = 0;
     TextView roundView;
     private ImageView playerReveal;
     private CardView outerCard;
@@ -63,6 +63,9 @@ public class RoundActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.round_activity);
 
+        //round number loaded from shared preferences
+        getPrefs();
+
         //players loaded in from sql database
         myDb = new DatabaseHelper(RoundActivity.this);
         try {
@@ -70,11 +73,6 @@ public class RoundActivity extends AppCompatActivity {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
-        //round number loaded from shared preferences
-        msharedPreferences = getSharedPreferences("GAME",MODE_PRIVATE);
-        prevRound = msharedPreferences.getInt("currentRound",0);
-        countLimit = Integer.toString(msharedPreferences.getInt("roundLength",15));
 
         clockTimeView = findViewById(R.id.clockTimeView);
         count = countLimit;
@@ -152,7 +150,7 @@ public class RoundActivity extends AppCompatActivity {
                 togglePicture(i,0);
             }
             for (int i=0;i<number;i++){
-                Player currPlayer= players.get(i);
+                Player currPlayer= playersUnshuffled.get(i);
                 //converting drawable into bitmap and then into byte[] to store in sql
                 Bitmap icon = currPlayer.getImage();
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -162,7 +160,7 @@ public class RoundActivity extends AppCompatActivity {
                 byte[] bytarray = Base64.decode(encodedImageString, Base64.DEFAULT);
                 myDb.updateData(Integer.toString(currPlayer.getId()),currPlayer.getName(),null,null,null,bytarray);
             }
-            incrementRound();
+            setPrefs();
             backToLobby();
         }
     }
@@ -275,7 +273,7 @@ public class RoundActivity extends AppCompatActivity {
         this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                editor = msharedPreferences.edit();
+                editor = getSharedPreferences("GAME", 0).edit();
                 editor.putInt("currentRound", prevRound+1);
                 editor.commit();
             }
@@ -331,36 +329,41 @@ public class RoundActivity extends AppCompatActivity {
         }
         else{
             while(cursor.moveToNext()){
-                //the image is converted from byte[] to bitmap using bytes2bitmap()
                 players.add(new Player(Integer.parseInt(cursor.getString(0)),cursor.getString(1)
-                        ,new Song(cursor.getString(3),cursor.getString(4)),Bytes2Bitmap(cursor.getBlob(2))));
+                        ,new Song(cursor.getString(3),cursor.getString(4)), Serializer.deserializeBitmap(cursor.getBlob(2))));
             }
         }
+        playersUnshuffled = players;
         Collections.shuffle(players);
-    }
-
-    //SOURCED function to convert byted array to bitmap image
-    public final static Bitmap Bytes2Bitmap(byte[] b) {
-        if (b == null) {
-            return null;
-        }
-        if (b.length != 0) {
-            InputStream is = new ByteArrayInputStream(b);
-            Bitmap bmp = BitmapFactory.decodeStream(is);
-            return bmp;
-        } else {
-            return null;
-        }
     }
 
     private void reset(){
         myDb.wipe();
-        editor = msharedPreferences.edit();
-        editor.putInt("currentRound", 0);
-        editor.commit();
+        resetRound();
         Intent intent = new Intent(this, StartScreenActivity.class);
         startActivity(intent);
     }
+
+    protected void setPrefs(){
+        SharedPreferences sharedPrefs = getSharedPreferences("GAME",MODE_PRIVATE);
+        SharedPreferences.Editor sharedEditor= sharedPrefs.edit();
+        sharedEditor.putInt("currentRound", prevRound+1);
+        sharedEditor.commit();
+    }
+
+    protected void getPrefs(){
+        SharedPreferences sharedPrefs = getSharedPreferences("GAME",MODE_PRIVATE);
+        countLimit= String.valueOf(sharedPrefs.getInt("roundLength",15));
+        prevRound = sharedPrefs.getInt("currentRound",0);
+    }
+
+    protected void resetRound(){
+        SharedPreferences sharedPrefs = getSharedPreferences("GAME",MODE_PRIVATE);
+        SharedPreferences.Editor sharedEditor = sharedPrefs.edit();
+        sharedEditor.putInt("currentRound", 0);
+        sharedEditor.commit();
+    }
+
     public void onBackPressed() {
         popup.setContentView(R.layout.pop_up);
         Button yes = popup.findViewById(R.id.no);

@@ -23,6 +23,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.boppong_dev.Connectors.Serializer;
 import com.example.boppong_dev.Model.Player;
 import com.example.boppong_dev.Model.Song;
 import com.example.boppong_dev.Model.players_recyclerViewAdapter;
@@ -54,9 +55,7 @@ public class LobbyActivity extends AppCompatActivity implements RecyclerViewInte
         setContentView(R.layout.lobby_activity);
 
         //opening internal storage to get current round and set it
-        msharedPreferences = getSharedPreferences("GAME",MODE_PRIVATE);
-        currentRound = msharedPreferences.getInt("currentRound",0);
-        roundLimit = msharedPreferences.getInt("roundLimit",3);
+        getPrefs();
         roundView = findViewById(R.id.roundView);
         roundView.setText("Round "+(int)(currentRound+(int)1));
 
@@ -65,7 +64,6 @@ public class LobbyActivity extends AppCompatActivity implements RecyclerViewInte
         prompt.setText(prompts.get(currentRound));
 
         myDb = new DatabaseHelper(LobbyActivity.this);
-
         popup = new Dialog(this);
 
         //ends game if current round reaches the limit
@@ -92,10 +90,9 @@ public class LobbyActivity extends AppCompatActivity implements RecyclerViewInte
 
     //resets internal and sql memory and brings user back to start screen
     private void reset(){
+        System.out.println("wahheyey");
         myDb.wipe();
-        editor = msharedPreferences.edit();
-        editor.putInt("currentRound", 0);
-        editor.commit();
+        resetRound();
         Intent intent = new Intent(this, StartScreenActivity.class);
         startActivity(intent);
     }
@@ -118,7 +115,6 @@ public class LobbyActivity extends AppCompatActivity implements RecyclerViewInte
         Intent intent = new Intent(this, UserEditActivity.class);
 
         intent.putExtra("id", players.get(position).getId());
-        intent.putExtra("round",currentRound);
         intent.putStringArrayListExtra("prompts",prompts);
 
         startActivity(intent);
@@ -177,22 +173,8 @@ public class LobbyActivity extends AppCompatActivity implements RecyclerViewInte
             while(cursor.moveToNext()){
                 //the image is converted from byte[] to bitmap using bytes2bitmap()
                 players.add(new Player(Integer.parseInt(cursor.getString(0)),cursor.getString(1)
-                ,new Song(cursor.getString(3),cursor.getString(4)),Bytes2Bitmap(cursor.getBlob(2))));
+                ,new Song(cursor.getString(3),cursor.getString(4)), Serializer.deserializeBitmap(cursor.getBlob(2))));
             }
-        }
-    }
-
-    //sourced function that converts byte array to bitmap image
-    public final static Bitmap Bytes2Bitmap(byte[] b) {
-        if (b == null) {
-            return null;
-        }
-        if (b.length != 0) {
-            InputStream is = new ByteArrayInputStream(b);
-            Bitmap bmp = BitmapFactory.decodeStream(is);
-            return bmp;
-        } else {
-            return null;
         }
     }
 
@@ -215,5 +197,18 @@ public class LobbyActivity extends AppCompatActivity implements RecyclerViewInte
         });
         popup.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         popup.show();
+    }
+
+    protected void getPrefs(){
+        SharedPreferences sharedPrefs = getSharedPreferences("GAME",MODE_PRIVATE);
+        roundLimit = sharedPrefs.getInt("roundLimit",3);
+        currentRound = sharedPrefs.getInt("currentRound",0);
+    }
+
+    protected void resetRound(){
+        SharedPreferences sharedPrefs = getSharedPreferences("GAME",MODE_PRIVATE);
+        SharedPreferences.Editor sharedEditor = sharedPrefs .edit();
+        sharedEditor.putInt("currentRound", 0);
+        sharedEditor.commit();
     }
 }

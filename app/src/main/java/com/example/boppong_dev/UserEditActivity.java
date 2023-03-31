@@ -47,7 +47,7 @@ public class UserEditActivity extends AppCompatActivity implements TextWatcher, 
     TextView playerName;
     EditText editPlayerName;
     ImageView playerImage;
-    int playerId, round;
+    int playerId;
     Song chosenSong;
     private static final int img_id = 123;
     private ArrayList<String> prompts;
@@ -67,7 +67,6 @@ public class UserEditActivity extends AppCompatActivity implements TextWatcher, 
         chosenSong = new Song("","");
 
         //loading data from intent
-        round = getIntent().getIntExtra("round",0);
         playerId = getIntent().getIntExtra("id",0);
         prompts = getIntent().getStringArrayListExtra("prompts");
 
@@ -168,8 +167,6 @@ public class UserEditActivity extends AppCompatActivity implements TextWatcher, 
 
     //updating edited player data to database then sends them back to the lobby screen
     public void onSaveChanges(View view) throws Exception {
-        String writePlayerName = currentPlayer.getName();
-        System.out.println("swaggy");
         //only triggers if a song is selected
         if (chosenSong.getName().equals(songSub.getText().toString())&&editPlayerName.getText().toString()!=null&&chosenSong.getName()!=""){
             Intent intent = new Intent(this, LobbyActivity.class);
