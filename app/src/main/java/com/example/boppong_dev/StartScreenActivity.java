@@ -14,11 +14,8 @@ import android.widget.Button;
 import android.widget.TextView;
 
 
-import com.example.boppong_dev.Connectors.Serializer;
 import com.example.boppong_dev.Connectors.UserService;
-import com.example.boppong_dev.Model.Song;
 import com.example.boppong_dev.Model.User;
-import com.spotify.android.appremote.api.SpotifyAppRemote;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
@@ -28,7 +25,6 @@ import com.spotify.sdk.android.auth.AuthorizationRequest;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
 
 import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
 
 
 public class StartScreenActivity extends AppCompatActivity implements View.OnClickListener{
@@ -44,8 +40,8 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
     protected AuthorizationRequest.Builder builder =
             new AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI);
 
-    protected Button minus,plus,start;
-    protected TextView playerCount;
+    protected Button start;
+    protected TextView playerCount,minus,plus;
     int[] playerProfilesDefault = {R.drawable.testprofile1,R.drawable.testprofile2
             ,R.drawable.testprofile3,R.drawable.testprofile4,R.drawable.testprofile5,R.drawable.testprofile6};
 

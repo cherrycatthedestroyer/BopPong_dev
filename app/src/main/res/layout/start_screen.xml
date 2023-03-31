@@ -4,41 +4,129 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/start_screen"
+    android:elevation="0dp"
     tools:context=".StartScreenActivity">
 
-    <TextView
-        android:id="@+id/playerCountView"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="200dp"
-        android:textSize="24sp"
-        app:layout_constraintBottom_toTopOf="@+id/startGame"
+        android:layout_marginTop="450dp"
+        android:padding="0dp"
+        app:cardBackgroundColor="#00FFFFFF"
+        app:cardCornerRadius="18dp"
+        app:cardElevation="4dp"
+        app:cardMaxElevation="4dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/imageView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:elevation="0dp"
+                android:outlineAmbientShadowColor="#000000"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ticker" />
+
+            <TextView
+                android:id="@+id/reduceGroupView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:clickable="true"
+                android:gravity="center"
+                android:onClick="onClick"
+                android:text="-"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="34sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@+id/imageView2"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/playerCountView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:textSize="24sp"
+                app:layout_constraintEnd_toStartOf="@+id/increaseGroupView"
+                app:layout_constraintHorizontal_bias="0.526"
+                app:layout_constraintStart_toEndOf="@+id/reduceGroupView"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/increaseGroupView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="24dp"
+                android:clickable="true"
+                android:gravity="center"
+                android:onClick="onClick"
+                android:text="+"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="34sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="@+id/imageView2"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="128dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/logo" />
 
     <Button
-        android:id="@+id/reduceGroupView"
+        android:id="@+id/reduceGroupView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="64dp"
-        android:layout_marginBottom="200dp"
-        android:backgroundTint="#C14953"
+        android:backgroundTint="#00C14953"
+        android:paddingLeft="0dp"
+        android:paddingTop="0dp"
+        android:paddingRight="0dp"
+        android:paddingBottom="0dp"
         android:text="@string/minus"
         android:textColor="@color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        android:visibility="invisible"
+        tools:layout_editor_absoluteX="87dp"
+        tools:layout_editor_absoluteY="294dp" />
 
     <Button
-        android:id="@+id/increaseGroupView"
+        android:id="@+id/increaseGroupView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="64dp"
-        android:layout_marginBottom="200dp"
-        android:backgroundTint="#C14953"
+        android:backgroundTint="#00C14953"
+        android:padding="0dp"
+        android:paddingLeft="0dp"
+        android:paddingTop="0dp"
+        android:paddingRight="0dp"
+        android:paddingBottom="0dp"
         android:text="@string/plus"
         android:textColor="@color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:visibility="invisible"
+        tools:layout_editor_absoluteX="223dp"
+        tools:layout_editor_absoluteY="294dp" />
 
     <Button
         android:id="@+id/startGame"
@@ -46,22 +134,29 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="64dp"
         android:backgroundTint="#C14953"
+        android:fontFamily="@font/inter_black"
         android:text="@string/startButton"
+        android:textAllCaps="false"
         android:textColor="@color/white"
+        android:textSize="34sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        style="?android:attr/borderlessButtonStyle"/>
 
     <TextView
         android:id="@+id/textView3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="64dp"
+        android:layout_marginTop="392dp"
+        android:fontFamily="@font/raleway_light"
         android:text="@string/playerSelect"
+        android:textColor="#FFFFFF"
         android:textSize="20sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/playerCountView"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
