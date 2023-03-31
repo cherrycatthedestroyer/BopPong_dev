@@ -44,6 +44,7 @@ public class LobbyActivity extends AppCompatActivity implements RecyclerViewInte
     ArrayList<String> prompts;
     TextView prompt;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

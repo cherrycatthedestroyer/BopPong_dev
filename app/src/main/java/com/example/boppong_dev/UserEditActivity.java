@@ -45,6 +45,7 @@ public class UserEditActivity extends AppCompatActivity implements TextWatcher, 
     Song chosenSong;
     ImageView imageViewPhoto;
     private static final int img_id = 123;
+    private ArrayList<String> prompts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +61,7 @@ public class UserEditActivity extends AppCompatActivity implements TextWatcher, 
         //loading data from intent
         round = getIntent().getIntExtra("round",0);
         playerId = getIntent().getIntExtra("id",0);
+        prompts = getIntent().getStringArrayListExtra("prompts");
 
         try {
             currentPlayer = fetchPlayer(playerId);
@@ -148,6 +150,8 @@ public class UserEditActivity extends AppCompatActivity implements TextWatcher, 
                     chosenSong.getId(),
                     chosenSong.getArtist(),
                     Serializer.serializeBitmap(currentPlayer.getImage()));
+
+            intent.putStringArrayListExtra("prompts",prompts);
             startActivity(intent);
         }
         else{
