@@ -11,6 +11,7 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 
@@ -25,6 +26,9 @@ import com.spotify.sdk.android.auth.AuthorizationRequest;
 import com.spotify.sdk.android.auth.AuthorizationResponse;
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 
 
 public class StartScreenActivity extends AppCompatActivity implements View.OnClickListener{
@@ -41,7 +45,9 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
             new AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI);
 
     protected Button start;
-    protected TextView playerCount,minus,plus;
+
+    ImageView minus,plus;
+    protected TextView playerCount;
     int[] playerProfilesDefault = {R.drawable.testprofile1,R.drawable.testprofile2
             ,R.drawable.testprofile3,R.drawable.testprofile4,R.drawable.testprofile5,R.drawable.testprofile6};
 
@@ -119,6 +125,9 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
     //Takes user to the lobby
     private void startActivity2() {
         Intent newIntent = new Intent(StartScreenActivity.this, LobbyActivity.class);
+        ArrayList<String> prompts = new ArrayList<String>(Arrays.asList(getResources().getStringArray(R.array.prompts)));;
+        Collections.shuffle(prompts);
+        newIntent.putStringArrayListExtra("prompts",prompts);
         startActivity(newIntent);
     }
 

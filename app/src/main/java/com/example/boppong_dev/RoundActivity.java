@@ -1,6 +1,7 @@
 package com.example.boppong_dev;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -19,7 +20,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.boppong_dev.Connectors.Serializer;
 import com.example.boppong_dev.Model.Player;
 import com.example.boppong_dev.Model.Song;
 import com.spotify.android.appremote.api.ConnectionParams;
@@ -31,6 +31,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class RoundActivity extends AppCompatActivity {
     DatabaseHelper myDb;
@@ -46,8 +47,11 @@ public class RoundActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private TextView progressText;
     int i = 0;
-
-    private ImageView playerReveal,outerCard;
+    TextView roundView;
+    private ImageView playerReveal;
+    private CardView outerCard;
+    ArrayList<String> prompts;
+    TextView prompt;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +83,13 @@ public class RoundActivity extends AppCompatActivity {
         playerReveal.setVisibility(View.INVISIBLE);
         outerCard = findViewById(R.id.outerCard);
         outerCard.setVisibility(View.INVISIBLE);
+
+        roundView = findViewById(R.id.roundView2);
+        roundView.setText("Round "+(int)(prevRound+(int)1));
+
+        prompts = getIntent().getStringArrayListExtra("prompts");
+        prompt = findViewById(R.id.promptView2);
+        prompt.setText(prompts.get(prevRound));
 
         //This listener is responsible for changing the view data depending on what game state
         //It is being used as an event listener where view data is updated depending on the state its in
@@ -132,7 +143,6 @@ public class RoundActivity extends AppCompatActivity {
                 togglePlayerName(i,0);
                 togglePicture(i,0);
             }
-            /*
             for (int i=0;i<number;i++){
                 Player currPlayer= players.get(i);
                 //converting drawable into bitmap and then into byte[] to store in sql
@@ -144,7 +154,6 @@ public class RoundActivity extends AppCompatActivity {
                 byte[] bytarray = Base64.decode(encodedImageString, Base64.DEFAULT);
                 myDb.updateData(Integer.toString(currPlayer.getId()),currPlayer.getName(),null,null,null,bytarray);
             }
-            */
             incrementRound();
             backToLobby();
         }
@@ -282,6 +291,7 @@ public class RoundActivity extends AppCompatActivity {
             @Override
             public void run() {
                 Intent newIntent = new Intent(RoundActivity.this, LobbyActivity.class);
+                newIntent.putStringArrayListExtra("prompts",prompts);
                 startActivity(newIntent);
             }
         });
@@ -313,6 +323,7 @@ public class RoundActivity extends AppCompatActivity {
                         ,new Song(cursor.getString(3),cursor.getString(4)),Bytes2Bitmap(cursor.getBlob(2))));
             }
         }
+        Collections.shuffle(players);
     }
 
     //SOURCED function to convert byted array to bitmap image

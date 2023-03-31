@@ -12,13 +12,13 @@
     <string name="minus">-</string>
     <string name="begin">Begin</string>
     <string name="nameHidden">Who picked it?</string>
-    <string-array name="testPlayers">
-        <item>Josh</item>
-        <item>Nathan</item>
-        <item>Ahmik</item>
-        <item>Dom</item>
-        <item>Nick</item>
-        <item>Adrian</item>
+    <string-array name="prompts">
+        <item>a song I cry to ...</item>
+        <item>a song that\'s deep ...</item>
+        <item>a song for workouts ...</item>
+        <item>a song for date night ...</item>
+        <item>a song I hate ...</item>
+        <item>a song my mom loves ...</item>
     </string-array>
     <string name="startGame">Start round?</string>
 </resources>

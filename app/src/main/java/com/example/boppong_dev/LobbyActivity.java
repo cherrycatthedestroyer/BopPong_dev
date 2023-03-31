@@ -41,6 +41,8 @@ public class LobbyActivity extends AppCompatActivity implements RecyclerViewInte
     int currentRound, roundLimit=3;
     TextView roundView;
     DatabaseHelper myDb;
+    ArrayList<String> prompts;
+    TextView prompt;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +53,11 @@ public class LobbyActivity extends AppCompatActivity implements RecyclerViewInte
         msharedPreferences = getSharedPreferences("GAME",MODE_PRIVATE);
         currentRound = msharedPreferences.getInt("currentRound",0);
         roundView = findViewById(R.id.roundView);
-        roundView.setText("Current round: "+currentRound);
+        roundView.setText("Round "+(int)(currentRound+(int)1));
+
+        prompts = getIntent().getStringArrayListExtra("prompts");
+        prompt = findViewById(R.id.promptView);
+        prompt.setText(prompts.get(currentRound));
 
         myDb = new DatabaseHelper(LobbyActivity.this);
 
@@ -104,24 +110,9 @@ public class LobbyActivity extends AppCompatActivity implements RecyclerViewInte
     public void onItemClick(int position) {
         Intent intent = new Intent(this, UserEditActivity.class);
 
-        //converting bitmap into byte[] to store as paracable extra
-
-        Bitmap icon = players.get(position).getImage();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        icon.compress(Bitmap.CompressFormat.PNG, 100, baos);
-        byte[] b = baos.toByteArray();
-        String encodedImageString = Base64.encodeToString(b, Base64.DEFAULT);
-
-        byte[] bytarray = Base64.decode(encodedImageString, Base64.DEFAULT);
-
-        //technically don't need all of this, just the id and the rest can be retrieved from sql
-        //loads selected player data into the edit user screen
         intent.putExtra("id", players.get(position).getId());
-        intent.putExtra("name", players.get(position).getName());
-        intent.putExtra("image", bytarray);
-        intent.putExtra("song", players.get(position).getSongSubmission().getName());
-
         intent.putExtra("round",currentRound);
+        intent.putStringArrayListExtra("prompts",prompts);
 
         startActivity(intent);
     }
@@ -150,6 +141,7 @@ public class LobbyActivity extends AppCompatActivity implements RecyclerViewInte
                 if (event.values[0]==-1.0){
                     if (playersReady()){
                         Intent intent = new Intent(this, StartRoundActivity.class);
+                        intent.putStringArrayListExtra("prompts",prompts);
                         startActivity(intent);
                     }
                 }
