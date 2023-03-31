@@ -65,10 +65,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cv.put(COLUMN_SONG_ARTIST,playerSongArtist);
         long result = db.insert(TABLE_NAME,null,cv);
         if (result==-1){
-            Toast.makeText(context,"add failed", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(context,"add failed", Toast.LENGTH_SHORT).show();
         }
         else{
-            Toast.makeText(context,"success", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(context,"success", Toast.LENGTH_SHORT).show();
         }
     }
 

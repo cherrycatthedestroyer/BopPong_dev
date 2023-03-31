@@ -4,18 +4,24 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.ActivityOptions;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.Base64;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,6 +49,7 @@ public class LobbyActivity extends AppCompatActivity implements RecyclerViewInte
     DatabaseHelper myDb;
     ArrayList<String> prompts;
     TextView prompt;
+    Dialog popup;
 
 
     @Override
@@ -61,6 +68,8 @@ public class LobbyActivity extends AppCompatActivity implements RecyclerViewInte
         prompt.setText(prompts.get(currentRound));
 
         myDb = new DatabaseHelper(LobbyActivity.this);
+
+        popup = new Dialog(this);
 
         //ends game if current round reaches the limit
         if (currentRound>roundLimit){
@@ -188,5 +197,26 @@ public class LobbyActivity extends AppCompatActivity implements RecyclerViewInte
         } else {
             return null;
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        popup.setContentView(R.layout.pop_up);
+        Button yes = popup.findViewById(R.id.yes);
+        Button no = popup.findViewById(R.id.no);
+        yes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                reset();
+            }
+        });
+        no.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popup.dismiss();
+            }
+        });
+        popup.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        popup.show();
     }
 }

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="MyTextInputLayoutStyle" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">@color/BPred</item>
+        <item name="hintTextColor">@color/BPred</item>
+        <item name="boxStrokeWidthFocused">2dp</item>
+    </style>
+    <style name="MyTextDropDown" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+        <item name="boxStrokeColor">@color/BPred</item>
+        <item name="hintTextColor">@color/BPred</item>
+        <item name="boxStrokeWidthFocused">2dp</item>
+    </style>
+</resources>

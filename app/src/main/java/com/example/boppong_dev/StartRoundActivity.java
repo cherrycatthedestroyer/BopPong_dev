@@ -23,4 +23,11 @@ public class StartRoundActivity extends AppCompatActivity {
         intent.putStringArrayListExtra("prompts",prompts);
         startActivity(intent);
     }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(this, LobbyActivity.class);
+        intent.putStringArrayListExtra("prompts",prompts);
+        startActivity(intent);
+    }
 }

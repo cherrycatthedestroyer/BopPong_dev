@@ -2,6 +2,7 @@ package com.example.boppong_dev;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -12,7 +13,9 @@ import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Base64;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
@@ -30,6 +33,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class UserEditActivity extends AppCompatActivity implements TextWatcher, AdapterView.OnItemClickListener {
     DatabaseHelper myDb;
@@ -46,6 +51,8 @@ public class UserEditActivity extends AppCompatActivity implements TextWatcher, 
     ImageView imageViewPhoto;
     private static final int img_id = 123;
     private ArrayList<String> prompts;
+    private InputMethodManager imm;
+    private boolean isKeyboardEnabled = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,12 +82,31 @@ public class UserEditActivity extends AppCompatActivity implements TextWatcher, 
         imageViewPhoto = findViewById(R.id.selectedPlayerImageView);
 
         playerName.setText(currentPlayer.getName());
+        editPlayerName.setText(currentPlayer.getName());
         playerImage.setImageBitmap(currentPlayer.getImage());
+
+        if (currentPlayer.getSongSubmission().getId()!=null){
+            chosenSong=currentPlayer.getSongSubmission();
+            songSub.setText(chosenSong.getName());
+        }
 
         songService = new SongService(getApplicationContext());
 
         songSub = findViewById(R.id.songSubEntry);
         songSub.addTextChangedListener(this);
+        imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        songSub.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    if (!isKeyboardEnabled) {
+                        imm.showSoftInput(songSub, InputMethodManager.SHOW_IMPLICIT);
+                    }
+                    isKeyboardEnabled = true;
+                }
+                return false;
+            }
+        });
 
         //custom dropdown box that requires custom view to inflate results with
         adapter = new DropDownAdapter<String>(this, android.R.layout.simple_list_item_1, searchResults);
@@ -108,6 +134,14 @@ public class UserEditActivity extends AppCompatActivity implements TextWatcher, 
         if (songSub.isFocused()){
             if (s.length()>3){
                 getTracks();
+
+                Timer timer = new Timer();
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        imm.hideSoftInputFromWindow(songSub.getWindowToken(), 0);
+                    }
+                }, 3000);
             }
         }
     }
@@ -136,7 +170,7 @@ public class UserEditActivity extends AppCompatActivity implements TextWatcher, 
         String writePlayerName = currentPlayer.getName();
         System.out.println("swaggy");
         //only triggers if a song is selected
-        if (chosenSong.getName().equals(songSub.getText().toString())){
+        if (chosenSong.getName().equals(songSub.getText().toString())&&editPlayerName.getText().toString()!=null&&chosenSong.getName()!=""){
             Intent intent = new Intent(this, LobbyActivity.class);
             if (editPlayerName.getText()!=null){
                 currentPlayer.setName(editPlayerName.getText().toString().trim());
@@ -155,8 +189,13 @@ public class UserEditActivity extends AppCompatActivity implements TextWatcher, 
             startActivity(intent);
         }
         else{
-            Toast.makeText(this,"please select  a song", Toast.LENGTH_SHORT).show();
-            songSub.requestFocus();
+            if (!chosenSong.getName().equals(songSub.getText().toString())) {
+                songSub.setText("");
+                songSub.requestFocus();
+            }
+            else{
+                editPlayerName.requestFocus();
+            }
         }
     }
 
@@ -196,5 +235,10 @@ public class UserEditActivity extends AppCompatActivity implements TextWatcher, 
             }
         }
         return temp_player;
+    }
+    public void onBackPressed() {
+        Intent intent = new Intent(this, LobbyActivity.class);
+        intent.putStringArrayListExtra("prompts",prompts);
+        startActivity(intent);
     }
 }

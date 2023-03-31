@@ -37,10 +37,10 @@ public class players_recyclerViewAdapter extends RecyclerView.Adapter<players_re
     public void onBindViewHolder(@NonNull players_recyclerViewAdapter.MyViewHolder holder, int position) {
         holder.playerName.setText(players.get(position).name);
         if (players.get(position).songSubmission.getId()!=null){
-            holder.playerStatus.setText("Subbed");
+            holder.playerStatus.setText("song picked");
         }
         else{
-            holder.playerStatus.setText("unSubbed");
+            holder.playerStatus.setText("pick a song");
         }
         holder.playerPicture.setImageBitmap(players.get(position).getImage());
     }

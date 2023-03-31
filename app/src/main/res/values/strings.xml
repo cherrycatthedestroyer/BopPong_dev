@@ -12,6 +12,11 @@
     <string name="minus">-</string>
     <string name="begin">Begin</string>
     <string name="nameHidden">Who picked it?</string>
+    <string name="loading">...</string>
+    <string name="popup1">quit ?</string>
+    <string name="popup2">discard ?</string>
+    <string name="quit">yes</string>
+    <string name="cont">no</string>
     <string-array name="prompts">
         <item>a song I cry to ...</item>
         <item>a song that\'s deep ...</item>

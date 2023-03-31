@@ -3,11 +3,14 @@ package com.example.boppong_dev;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.text.Editable;
@@ -15,6 +18,7 @@ import android.text.TextWatcher;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -52,6 +56,7 @@ public class RoundActivity extends AppCompatActivity {
     private CardView outerCard;
     ArrayList<String> prompts;
     TextView prompt;
+    Dialog popup;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +95,8 @@ public class RoundActivity extends AppCompatActivity {
         prompts = getIntent().getStringArrayListExtra("prompts");
         prompt = findViewById(R.id.promptView2);
         prompt.setText(prompts.get(prevRound));
+
+        popup = new Dialog(this);
 
         //This listener is responsible for changing the view data depending on what game state
         //It is being used as an event listener where view data is updated depending on the state its in
@@ -232,7 +239,12 @@ public class RoundActivity extends AppCompatActivity {
                 public void run() {
                     clockTimeView.setText(count);
                     checkState();
-                    progressText.setText("" + (Integer.parseInt(count)+(int)1));
+                    if (Integer.parseInt(count)+(int)1==16){
+                        progressText.setText("...");
+                    }
+                    else{
+                        progressText.setText("" + (Integer.parseInt(count)+(int)1));
+                    }
                     progressBar.setProgress(percentage);
                 }
             });
@@ -338,5 +350,33 @@ public class RoundActivity extends AppCompatActivity {
         } else {
             return null;
         }
+    }
+
+    private void reset(){
+        myDb.wipe();
+        editor = msharedPreferences.edit();
+        editor.putInt("currentRound", 0);
+        editor.commit();
+        Intent intent = new Intent(this, StartScreenActivity.class);
+        startActivity(intent);
+    }
+    public void onBackPressed() {
+        popup.setContentView(R.layout.pop_up);
+        Button yes = popup.findViewById(R.id.yes);
+        Button no = popup.findViewById(R.id.no);
+        yes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                reset();
+            }
+        });
+        no.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popup.dismiss();
+            }
+        });
+        popup.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        popup.show();
     }
 }

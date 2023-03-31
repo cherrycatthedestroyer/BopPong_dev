@@ -2,6 +2,7 @@ package com.example.boppong_dev;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ActivityOptions;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -128,7 +129,8 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
         ArrayList<String> prompts = new ArrayList<String>(Arrays.asList(getResources().getStringArray(R.array.prompts)));;
         Collections.shuffle(prompts);
         newIntent.putStringArrayListExtra("prompts",prompts);
-        startActivity(newIntent);
+        Bundle b = ActivityOptions.makeSceneTransitionAnimation(this).toBundle();
+        startActivity(newIntent,b);
     }
 
     //selecting how many players will be in the game and generating their objects and adding that to database
