@@ -9,7 +9,11 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -51,14 +55,20 @@ public class UserEditActivity extends AppCompatActivity implements TextWatcher, 
     Song chosenSong;
     private static final int img_id = 123;
     private ArrayList<String> prompts;
-    private InputMethodManager imm;
-    private boolean isKeyboardEnabled = true;
+    MediaPlayer click,back,startSound;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.user_edit_activity);
+
+        //hides notification bar
+        View decorView = getWindow().getDecorView();
+        int options1 = View.SYSTEM_UI_FLAG_FULLSCREEN;
+        int options2 = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+        decorView.setSystemUiVisibility(options1);
+        decorView.setSystemUiVisibility(options2);
 
         currentRound = getIntent().getIntExtra("round",0);
         //opens up sql database
@@ -85,29 +95,10 @@ public class UserEditActivity extends AppCompatActivity implements TextWatcher, 
         editPlayerName.setText(currentPlayer.getName());
         playerImage.setImageBitmap(currentPlayer.getImage());
 
-        if (currentPlayer.getSongSubmission().getId()!=null){
-            chosenSong=currentPlayer.getSongSubmission();
-            songSub.setText(chosenSong.getName());
-        }
-
         songService = new SongService(getApplicationContext());
 
         songSub = findViewById(R.id.songSubEntry);
         songSub.addTextChangedListener(this);
-        imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-
-        songSub.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_UP) {
-                    if (!isKeyboardEnabled) {
-                        imm.showSoftInput(songSub, InputMethodManager.SHOW_IMPLICIT);
-                    }
-                    isKeyboardEnabled = true;
-                }
-                return false;
-            }
-        });
 
         //custom dropdown box that requires custom view to inflate results with
         adapter = new DropDownAdapter<String>(this, android.R.layout.simple_list_item_1, searchResults);
@@ -117,6 +108,11 @@ public class UserEditActivity extends AppCompatActivity implements TextWatcher, 
         songSub.setOnItemClickListener(this);
         //song search
         getTracks();
+
+        //sounds
+        click = MediaPlayer.create(this, R.raw.type2);
+        startSound = MediaPlayer.create(this, R.raw.start);
+        back = MediaPlayer.create(this, R.raw.back);
     }
 
     @Override
@@ -163,6 +159,7 @@ public class UserEditActivity extends AppCompatActivity implements TextWatcher, 
     public void onSaveChanges(View view) throws Exception {
         //only triggers if a song is selected
         if (chosenSong.getName().equals(songSub.getText().toString())&&editPlayerName.getText().toString()!=null&&chosenSong.getName()!=""){
+            startSound.start();
             Intent intent = new Intent(this, LobbyActivity.class);
             if (editPlayerName.getText()!=null){
                 currentPlayer.setName(editPlayerName.getText().toString().trim());
@@ -182,6 +179,13 @@ public class UserEditActivity extends AppCompatActivity implements TextWatcher, 
             startActivity(intent);
         }
         else{
+            Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                v.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE));
+            } else {
+                //deprecated in API 26
+                v.vibrate(500);
+            }
             if (!chosenSong.getName().equals(songSub.getText().toString())) {
                 songSub.setText("");
                 songSub.requestFocus();
@@ -194,12 +198,14 @@ public class UserEditActivity extends AppCompatActivity implements TextWatcher, 
 
     //selects song from dropdown search options
     public void onItemClick(AdapterView<?> parent, View view, int position, long rowId) {
-        Song selection = (Song) parent.getSelectedItem();
+        click.start();
+        Song selection = (Song) parent.getItemAtPosition(position);
         chosenSong = selection;
     }
 
     //intent redirects user to camera
     public void goToCamera (View view){
+        click.start();
         Intent camera_intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         startActivityForResult(camera_intent, img_id);
     }
@@ -229,6 +235,7 @@ public class UserEditActivity extends AppCompatActivity implements TextWatcher, 
         return temp_player;
     }
     public void onBackPressed() {
+        back.start();
         Intent intent = new Intent(this, LobbyActivity.class);
         intent.putStringArrayListExtra("prompts",prompts);
         startActivity(intent);

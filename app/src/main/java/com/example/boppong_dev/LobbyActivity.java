@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -17,6 +19,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -47,12 +50,20 @@ public class LobbyActivity extends AppCompatActivity implements RecyclerViewInte
     ArrayList<String> prompts;
     TextView prompt;
     Dialog popup;
+    MediaPlayer click,back,startSound;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.lobby_activity);
+
+        //hides notification bar
+        View decorView = getWindow().getDecorView();
+        int options1 = View.SYSTEM_UI_FLAG_FULLSCREEN;
+        int options2 = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+        decorView.setSystemUiVisibility(options1);
+        decorView.setSystemUiVisibility(options2);
 
         //opening internal storage to get current round and set it
         currentRound = getIntent().getIntExtra("round",0);
@@ -72,6 +83,12 @@ public class LobbyActivity extends AppCompatActivity implements RecyclerViewInte
             reset();
         }
 
+        ObjectAnimator animator = ObjectAnimator.ofFloat(prompt, "translationY", 0f, 20f);
+        animator.setDuration(1000);
+        animator.setRepeatCount(ValueAnimator.INFINITE);
+        animator.setRepeatMode(ValueAnimator.REVERSE);
+        animator.start();
+
         //inflating recycler view with user data
         RecyclerView recyclerView = findViewById(R.id.playerRecyclerView);
         players_recyclerViewAdapter adapter = new players_recyclerViewAdapter(this,players,this);
@@ -87,6 +104,11 @@ public class LobbyActivity extends AppCompatActivity implements RecyclerViewInte
                 gyro = sensorManager.getDefaultSensor(sensors.get(i).getType());
             }
         }
+
+        //sounds
+        click = MediaPlayer.create(this, R.raw.type2);
+        startSound = MediaPlayer.create(this, R.raw.start);
+        back = MediaPlayer.create(this, R.raw.back);
     }
 
     //resets internal and sql memory and brings user back to start screen
@@ -113,6 +135,7 @@ public class LobbyActivity extends AppCompatActivity implements RecyclerViewInte
     //triggered every time a player row is clicked and takes user to the edit player screen
     @Override
     public void onItemClick(int position) {
+        click.start();
         Intent intent = new Intent(this, UserEditActivity.class);
 
         intent.putExtra("id", players.get(position).getId());
@@ -140,6 +163,7 @@ public class LobbyActivity extends AppCompatActivity implements RecyclerViewInte
     //game prompt is started
     @Override
     public void onSensorChanged(SensorEvent event) {
+        startSound.start();
         int type = event.sensor.getType();
         if (gyro!=null){
             if (type==gyro.getType()){
@@ -183,6 +207,7 @@ public class LobbyActivity extends AppCompatActivity implements RecyclerViewInte
 
     @Override
     public void onBackPressed() {
+        back.start();
         popup.setContentView(R.layout.pop_up);
         Button yes = popup.findViewById(R.id.no);
         Button no = popup.findViewById(R.id.yes);

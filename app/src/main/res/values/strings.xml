@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">BopPong_dev</string>
-    <string name="playerSelect">How many players?</string>
+    <string name="playerSelect">How many players ?</string>
     <string name="startButton">Play</string>
     <string name="userNameDefault">PlayerX</string>
     <string name="userSongSubmitted">Submitted</string>
@@ -11,7 +11,7 @@
     <string name="plus">+</string>
     <string name="minus">-</string>
     <string name="begin">Begin</string>
-    <string name="nameHidden">Who picked it?</string>
+    <string name="nameHidden">Who picked it ?</string>
     <string name="loading">...</string>
     <string name="popup1">quit ?</string>
     <string name="popup2">discard ?</string>
@@ -36,5 +36,5 @@
         <item>this was cool when I was 10</item>
         <item>make the DJ play this</item>
     </string-array>
-    <string name="startGame">Start round?</string>
+    <string name="startGame">Start round ?</string>
 </resources>

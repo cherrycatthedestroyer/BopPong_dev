@@ -15,6 +15,8 @@
         <item name="android:windowActivityTransitions">true</item>
         <item name="android:windowEnterTransition">@transition/trans1</item>
         <item name="android:windowExitTransition">@transition/trans1</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:windowTranslucentStatus">true</item>
         <!-- Customize your theme here. -->
     </style>
 </resources>

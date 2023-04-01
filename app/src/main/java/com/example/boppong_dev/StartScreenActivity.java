@@ -2,6 +2,8 @@ package com.example.boppong_dev;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.app.ActivityOptions;
 import android.app.Dialog;
 import android.content.Intent;
@@ -10,6 +12,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Base64;
@@ -56,11 +59,19 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
             ,R.drawable.testprofile3,R.drawable.testprofile4,R.drawable.testprofile5,R.drawable.testprofile6};
     Dialog settings;
     int roundLimit, roundLength, tempRoundLimit, tempRoundLength;
+    MediaPlayer click,snap,startSound;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.start_screen);
+
+        //hides notification bar
+        View decorView = getWindow().getDecorView();
+        int options1 = View.SYSTEM_UI_FLAG_FULLSCREEN;
+        int options2 = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+        decorView.setSystemUiVisibility(options1);
+        decorView.setSystemUiVisibility(options2);
 
         //wipe database before creation of new lobby (prevents old users from existing)
         DatabaseHelper playerDb = new DatabaseHelper(StartScreenActivity.this);
@@ -81,6 +92,18 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
         start.setOnClickListener(this);
 
         playerCount.setText("0");
+
+        //bobbing animation up and down for the start button
+        ObjectAnimator animator = ObjectAnimator.ofFloat(start, "translationY", 0f, 20f);
+        animator.setDuration(1000);
+        animator.setRepeatCount(ValueAnimator.INFINITE);
+        animator.setRepeatMode(ValueAnimator.REVERSE);
+        animator.start();
+
+        //sounds
+        click = MediaPlayer.create(this, R.raw.type2);
+        startSound = MediaPlayer.create(this, R.raw.start);
+        snap = MediaPlayer.create(this, R.raw.snap);
     }
 
 
@@ -147,6 +170,7 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
     //and opening up the settings dialog and saving those value to shared prefs
     @Override
     public void onClick(View v) {
+        click.start();
         int value = Integer.parseInt(playerCount.getText().toString());
         if (v.getId()==settingsButton.getId()){
             tempRoundLimit = roundLimit == 3 ? 0 : (roundLimit == 15 ? 1 : 2);
@@ -154,7 +178,6 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
 
             settings.setContentView(R.layout.settings);
             Button yes = settings.findViewById(R.id.yes);
-            Button no = settings.findViewById(R.id.no);
             RadioGroup rounds = settings.findViewById(R.id.radioGroupRounds);
             RadioGroup length = settings.findViewById(R.id.radioGroupLength);
 
@@ -168,6 +191,7 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
             rounds.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(RadioGroup group, int checkedId) {
+                    snap.start();
                     if (checkedId == posRound[0]){
                         roundLimit = 3;
                     }
@@ -182,6 +206,7 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
             length.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(RadioGroup group, int checkedId) {
+                    snap.start();
                     if (checkedId == posLength[0]){
                         roundLength= 15;
                     }
@@ -196,12 +221,7 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
             yes.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    settings.dismiss();
-                }
-            });
-            no.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+                    click.start();
                     settings.dismiss();
                 }
             });
@@ -217,6 +237,7 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
                 value--;
             }
             else if (v.getId()==start.getId()){
+                startSound.start();
                 DatabaseHelper playerDb = new DatabaseHelper(StartScreenActivity.this);
 
                 for (int i=0;i<value;i++){

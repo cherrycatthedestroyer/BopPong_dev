@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     android:background="@drawable/start_screen"
     android:elevation="0dp"
-    tools:context=".StartScreenActivity">
+    tools:context=".StartScreenActivity"
+    android:fitsSystemWindows="true">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView"
@@ -128,7 +129,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/logo2" />
+        app:srcCompat="@drawable/vibe_check" />
 
     <Button
         android:id="@+id/reduceGroupView2"
@@ -181,11 +182,11 @@
         android:id="@+id/textView3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="392dp"
+        android:layout_marginTop="410dp"
         android:fontFamily="@font/raleway_light"
         android:text="@string/playerSelect"
         android:textColor="#FFFFFF"
-        android:textSize="20sp"
+        android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.496"

@@ -3,6 +3,8 @@ package com.example.boppong_dev;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,6 +13,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.text.Editable;
@@ -18,6 +21,8 @@ import android.text.TextWatcher;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -57,11 +62,24 @@ public class RoundActivity extends AppCompatActivity {
     ArrayList<String> prompts;
     TextView prompt;
     Dialog popup;
+    MediaPlayer click,back,startSound;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.round_activity);
+
+        //sounds
+        click = MediaPlayer.create(this, R.raw.type2);
+        startSound = MediaPlayer.create(this, R.raw.start);
+        back = MediaPlayer.create(this, R.raw.back);
+
+        //hides notification bar
+        View decorView = getWindow().getDecorView();
+        int options1 = View.SYSTEM_UI_FLAG_FULLSCREEN;
+        int options2 = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+        decorView.setSystemUiVisibility(options1);
+        decorView.setSystemUiVisibility(options2);
 
         //round number loaded from shared preferences
         getPrefs();
@@ -98,6 +116,12 @@ public class RoundActivity extends AppCompatActivity {
         prompt.setText(prompts.get(prevRound));
 
         popup = new Dialog(this);
+
+        ObjectAnimator animator = ObjectAnimator.ofFloat(prompt, "translationY", 0f, 20f);
+        animator.setDuration(1000);
+        animator.setRepeatCount(ValueAnimator.INFINITE);
+        animator.setRepeatMode(ValueAnimator.REVERSE);
+        animator.start();
 
         //This listener is responsible for changing the view data depending on what game state
         //It is being used as an event listener where view data is updated depending on the state its in
@@ -260,6 +284,7 @@ public class RoundActivity extends AppCompatActivity {
             @Override
             public void run() {
                 if (toggle==0){
+                    back.start();
                     nameRevealView.setText(players.get(playerIndex).getName());
                 }
                 else{
