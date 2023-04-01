@@ -47,7 +47,7 @@ public class UserEditActivity extends AppCompatActivity implements TextWatcher, 
     TextView playerName;
     EditText editPlayerName;
     ImageView playerImage;
-    int playerId;
+    int playerId, currentRound;
     Song chosenSong;
     private static final int img_id = 123;
     private ArrayList<String> prompts;
@@ -60,6 +60,7 @@ public class UserEditActivity extends AppCompatActivity implements TextWatcher, 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.user_edit_activity);
 
+        currentRound = getIntent().getIntExtra("round",0);
         //opens up sql database
         myDb = new DatabaseHelper(UserEditActivity.this);
 
@@ -134,14 +135,6 @@ public class UserEditActivity extends AppCompatActivity implements TextWatcher, 
         if (songSub.isFocused()){
             if (s.length()>3){
                 getTracks();
-
-                Timer timer = new Timer();
-                timer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        imm.hideSoftInputFromWindow(songSub.getWindowToken(), 0);
-                    }
-                }, 3000);
             }
         }
     }
@@ -154,6 +147,7 @@ public class UserEditActivity extends AppCompatActivity implements TextWatcher, 
             songService.searchTrack(() ->  {
                 if (searchResults.size()>0){
                     searchResults.clear();
+                    adapter.notifyDataSetChanged();
                 }
                 for (int i=0; i<songService.getSongs().size();i++){
                     searchResults.add(songService.getSongs().get(i));
@@ -184,6 +178,7 @@ public class UserEditActivity extends AppCompatActivity implements TextWatcher, 
                     Serializer.serializeBitmap(currentPlayer.getImage()));
 
             intent.putStringArrayListExtra("prompts",prompts);
+            intent.putExtra("round", currentRound);
             startActivity(intent);
         }
         else{
@@ -199,7 +194,7 @@ public class UserEditActivity extends AppCompatActivity implements TextWatcher, 
 
     //selects song from dropdown search options
     public void onItemClick(AdapterView<?> parent, View view, int position, long rowId) {
-        Song selection = (Song) parent.getItemAtPosition(position);
+        Song selection = (Song) parent.getSelectedItem();
         chosenSong = selection;
     }
 

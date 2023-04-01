@@ -55,6 +55,7 @@ public class LobbyActivity extends AppCompatActivity implements RecyclerViewInte
         setContentView(R.layout.lobby_activity);
 
         //opening internal storage to get current round and set it
+        currentRound = getIntent().getIntExtra("round",0);
         getPrefs();
         roundView = findViewById(R.id.roundView);
         roundView.setText("Round "+(int)(currentRound+(int)1));
@@ -67,7 +68,7 @@ public class LobbyActivity extends AppCompatActivity implements RecyclerViewInte
         popup = new Dialog(this);
 
         //ends game if current round reaches the limit
-        if (currentRound>roundLimit){
+        if (currentRound>roundLimit-1){
             reset();
         }
 
@@ -116,7 +117,7 @@ public class LobbyActivity extends AppCompatActivity implements RecyclerViewInte
 
         intent.putExtra("id", players.get(position).getId());
         intent.putStringArrayListExtra("prompts",prompts);
-
+        intent.putExtra("round", currentRound);
         startActivity(intent);
     }
 
@@ -125,6 +126,7 @@ public class LobbyActivity extends AppCompatActivity implements RecyclerViewInte
     protected void onResume() {
         super.onResume();
         //updating users via sql database
+        currentRound = getIntent().getIntExtra("round",0);
         try {
             fetchPlayers();
         } catch (Exception e) {
@@ -145,6 +147,7 @@ public class LobbyActivity extends AppCompatActivity implements RecyclerViewInte
                     if (playersReady()){
                         Intent intent = new Intent(this, StartRoundActivity.class);
                         intent.putStringArrayListExtra("prompts",prompts);
+                        intent.putExtra("round", currentRound);
                         startActivity(intent);
                     }
                 }
@@ -200,15 +203,13 @@ public class LobbyActivity extends AppCompatActivity implements RecyclerViewInte
     }
 
     protected void getPrefs(){
-        SharedPreferences sharedPrefs = getSharedPreferences("GAME",MODE_PRIVATE);
+        SharedPreferences sharedPrefs = getSharedPreferences("G0AME",MODE_PRIVATE);
         roundLimit = sharedPrefs.getInt("roundLimit",3);
-        currentRound = sharedPrefs.getInt("currentRound",0);
     }
 
     protected void resetRound(){
         SharedPreferences sharedPrefs = getSharedPreferences("GAME",MODE_PRIVATE);
-        SharedPreferences.Editor sharedEditor = sharedPrefs .edit();
-        sharedEditor.putInt("currentRound", 0);
+        SharedPreferences.Editor sharedEditor = sharedPrefs.edit();
         sharedEditor.commit();
     }
 }

@@ -20,12 +20,21 @@
     <string name="settings">settings</string>
 
     <string-array name="prompts">
-        <item>a song I cry to ...</item>
-        <item>a song that\'s deep ...</item>
-        <item>a song for workouts ...</item>
-        <item>a song for date night ...</item>
-        <item>a song I hate ...</item>
-        <item>a song my mom loves ...</item>
+        <item>the tear jerker</item>
+        <item>the gym pump</item>
+        <item>mom\'s favorite</item>
+        <item>a guilty pleasure</item>
+        <item>the date night move</item>
+        <item>utter crap</item>
+        <item>the hipster cut</item>
+        <item>this one\'s deep</item>
+        <item>play this at my funeral</item>
+        <item>the mood booster</item>
+        <item>the heartbreak healer</item>
+        <item>a karaoke favorite</item>
+        <item>my ex\'s favorite</item>
+        <item>this was cool when I was 10</item>
+        <item>make the DJ play this</item>
     </string-array>
     <string name="startGame">Start round?</string>
 </resources>

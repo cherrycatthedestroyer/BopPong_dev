@@ -42,24 +42,18 @@ import java.util.Collections;
 public class StartScreenActivity extends AppCompatActivity implements View.OnClickListener{
     private static final String CLIENT_ID = "a24f9f02a4fc4adb8138143d99bd8dc9";
     private static final String REDIRECT_URI = "https://www.youtube.com/";
-
     protected RequestQueue mRequestQueue;
-    protected StringRequest mStringRequest;
-
     private static final int REQUEST_CODE = 1337;
     private SharedPreferences.Editor editor;
     protected SharedPreferences msharedPreferences;
     protected AuthorizationRequest.Builder builder =
             new AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI);
-
     protected Button start;
     protected ImageButton settingsButton;
-
     ImageView minus,plus;
     protected TextView playerCount;
     int[] playerProfilesDefault = {R.drawable.testprofile1,R.drawable.testprofile2
             ,R.drawable.testprofile3,R.drawable.testprofile4,R.drawable.testprofile5,R.drawable.testprofile6};
-
     Dialog settings;
     int roundLimit, roundLength, tempRoundLimit, tempRoundLength;
 
@@ -71,12 +65,10 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
         //wipe database before creation of new lobby (prevents old users from existing)
         DatabaseHelper playerDb = new DatabaseHelper(StartScreenActivity.this);
         playerDb.wipe();
-        resetRound();
 
         settings = new Dialog(this);
         settingsButton = findViewById(R.id.settingsButton);
 
-        setPrefs(3,15,0);
         getPrefs();
 
         //setting up view objects
@@ -146,7 +138,7 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
         ArrayList<String> prompts = new ArrayList<String>(Arrays.asList(getResources().getStringArray(R.array.prompts)));;
         Collections.shuffle(prompts);
         newIntent.putStringArrayListExtra("prompts",prompts);
-        setPrefs(roundLimit,roundLength,0);
+        setPrefs(roundLimit,roundLength);
         Bundle b = ActivityOptions.makeSceneTransitionAnimation(this).toBundle();
         startActivity(newIntent,b);
     }
@@ -177,13 +169,13 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
                 @Override
                 public void onCheckedChanged(RadioGroup group, int checkedId) {
                     if (checkedId == posRound[0]){
-                        tempRoundLimit = 3;
+                        roundLimit = 3;
                     }
                     else if (checkedId == posRound[1]){
-                        tempRoundLimit = 6;
+                        roundLimit = 6;
                     }
                     else if (checkedId == posRound[2]){
-                        tempRoundLimit = 12;
+                        roundLimit = 12;
                     }
                 }
             });
@@ -191,22 +183,19 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
                 @Override
                 public void onCheckedChanged(RadioGroup group, int checkedId) {
                     if (checkedId == posLength[0]){
-                        tempRoundLength = 15;
+                        roundLength= 15;
                     }
                     else if (checkedId == posLength[1]){
-                        tempRoundLength= 30;
+                        roundLength= 30;
                     }
                     else if (checkedId == posLength[2]){
-                        tempRoundLength = 45;
+                        roundLength= 45;
                     }
-                    System.out.println(tempRoundLength);
                 }
             });
             yes.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    roundLimit = tempRoundLimit;
-                    roundLength = tempRoundLength;
                     settings.dismiss();
                 }
             });
@@ -260,15 +249,6 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
         playerCount.setText(Integer.toString(value));
     }
 
-    protected void setPrefs(int limit, int length, int round){
-        SharedPreferences sharedPrefs = getSharedPreferences("GAME",MODE_PRIVATE);
-        SharedPreferences.Editor sharedEditor= sharedPrefs.edit();
-        sharedEditor.putInt("roundLimit", limit);
-        sharedEditor.putInt("roundLength", length);
-        sharedEditor.putInt("currentRound", round);
-        sharedEditor.commit();
-    }
-
     protected void setPrefs(int limit, int length){
         SharedPreferences sharedPrefs = getSharedPreferences("GAME",MODE_PRIVATE);
         SharedPreferences.Editor sharedEditor= sharedPrefs.edit();
@@ -281,12 +261,5 @@ public class StartScreenActivity extends AppCompatActivity implements View.OnCli
         SharedPreferences sharedPrefs = getSharedPreferences("GAME",MODE_PRIVATE);
         roundLimit = sharedPrefs.getInt("roundLimit",3);
         roundLength = sharedPrefs.getInt("roundLength",15);
-    }
-
-    protected void resetRound(){
-        SharedPreferences sharedPrefs = getSharedPreferences("GAME",MODE_PRIVATE);
-        SharedPreferences.Editor sharedEditor = sharedPrefs.edit();
-        sharedEditor.putInt("currentRound", 0);
-        sharedEditor.commit();
     }
 }

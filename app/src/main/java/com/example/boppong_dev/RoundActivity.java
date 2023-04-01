@@ -74,6 +74,8 @@ public class RoundActivity extends AppCompatActivity {
             throw new RuntimeException(e);
         }
 
+        prevRound = getIntent().getIntExtra("round",0);
+
         clockTimeView = findViewById(R.id.clockTimeView);
         count = countLimit;
         nameRevealView = findViewById(R.id.nameRevealView);
@@ -149,8 +151,8 @@ public class RoundActivity extends AppCompatActivity {
                 togglePlayerName(i,0);
                 togglePicture(i,0);
             }
-            for (int i=0;i<number;i++){
-                Player currPlayer= playersUnshuffled.get(i);
+            for (int i=0;i<number;i++) {
+                Player currPlayer = playersUnshuffled.get(i);
                 //converting drawable into bitmap and then into byte[] to store in sql
                 Bitmap icon = currPlayer.getImage();
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -158,9 +160,8 @@ public class RoundActivity extends AppCompatActivity {
                 byte[] b = baos.toByteArray();
                 String encodedImageString = Base64.encodeToString(b, Base64.DEFAULT);
                 byte[] bytarray = Base64.decode(encodedImageString, Base64.DEFAULT);
-                myDb.updateData(Integer.toString(currPlayer.getId()),currPlayer.getName(),null,null,null,bytarray);
+                myDb.updateData(Integer.toString(currPlayer.getId()), currPlayer.getName(), null, null, null, bytarray);
             }
-            setPrefs();
             backToLobby();
         }
     }
@@ -303,6 +304,7 @@ public class RoundActivity extends AppCompatActivity {
             public void run() {
                 Intent newIntent = new Intent(RoundActivity.this, LobbyActivity.class);
                 newIntent.putStringArrayListExtra("prompts",prompts);
+                newIntent.putExtra("round", prevRound+1);
                 startActivity(newIntent);
             }
         });
@@ -339,29 +341,13 @@ public class RoundActivity extends AppCompatActivity {
 
     private void reset(){
         myDb.wipe();
-        resetRound();
         Intent intent = new Intent(this, StartScreenActivity.class);
         startActivity(intent);
-    }
-
-    protected void setPrefs(){
-        SharedPreferences sharedPrefs = getSharedPreferences("GAME",MODE_PRIVATE);
-        SharedPreferences.Editor sharedEditor= sharedPrefs.edit();
-        sharedEditor.putInt("currentRound", prevRound+1);
-        sharedEditor.commit();
     }
 
     protected void getPrefs(){
         SharedPreferences sharedPrefs = getSharedPreferences("GAME",MODE_PRIVATE);
         countLimit= String.valueOf(sharedPrefs.getInt("roundLength",15));
-        prevRound = sharedPrefs.getInt("currentRound",0);
-    }
-
-    protected void resetRound(){
-        SharedPreferences sharedPrefs = getSharedPreferences("GAME",MODE_PRIVATE);
-        SharedPreferences.Editor sharedEditor = sharedPrefs.edit();
-        sharedEditor.putInt("currentRound", 0);
-        sharedEditor.commit();
     }
 
     public void onBackPressed() {
